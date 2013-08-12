@@ -101,15 +101,7 @@ void printMemory(WINDOW* win, int y, int x, int address, int value, int is_break
 void refreshMemoryDisplay() {
     int i = 0;
     werase(&mainmem);
-    int j = 0;
-    memory[j++] = 0x0B;
-    memory[j++] = 0x50;
-    memory[j++] = 0x50;
-    memory[j++] = 0x50;
-    memory[j++] = 0x50;
-    memory[j++] = 0x0A;
-    memory[j++] = 0xA0;
-    memory[j++] = 0xAC;
+
     for(; i < mh - 2 && i + memdisplay < 65536; i++) {
 	printMemory(&mainmem, i, 0, i + memdisplay, memory[memdisplay + i], breakpoints[memdisplay + i], pc == (memdisplay + i));
 	/* TODO: print the binary value too! (And get rid of the test values below! */

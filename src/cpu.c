@@ -34,6 +34,18 @@ void resetMachine() { /* Clear the registers */
 
     stackmem = &memory[65536 - 256];
 
+    /* Set test program in memory */
+    int j = 0;
+    memory[j++] = 0x0B;
+    memory[j++] = 0x50;
+    memory[j++] = 0x50;
+    memory[j++] = 0x50;
+    memory[j++] = 0x50;
+    memory[j++] = 0x0A;
+    memory[j++] = 0xA0;
+    memory[j++] = 0xAC;
+
+
     refreshMemoryDisplay();
     refreshStackDisplay();
     refreshRegisterDisplay();
