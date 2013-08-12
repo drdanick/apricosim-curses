@@ -160,21 +160,30 @@ void x05() {
 
 void x06() {
     currentState = 0x06;
-    accumulator &= imm4;
+    if(f1) /* Apply operation to the most significant nibble */
+	accumulator &= (imm4 << 4);
+    else /* Apply operation to the least significant nibble */
+	accumulator &= (imm4 & 0x0F);
     setflags();
     nextState = &x00;
 }
 
 void x07() {
     currentState = 0x07;
-    accumulator |= imm4;
+    if(f1) /* Apply operation to the most significant nibble */
+	accumulator |= (imm4 << 4);
+    else /* Apply operation to the least significant nibble */
+	accumulator |= (imm4 & 0x0F);
     setflags();
     nextState = &x00;
 }
 
 void x08() {
     currentState = 0x08;
-    accumulator ^= imm4;
+    if(f1) /* Apply operation to the most significant nibble */
+	accumulator ^= (imm4 << 4);
+    else /* Apply operation to the least significant nibble */
+	accumulator ^= (imm4 & 0x0F);
     setflags();
     nextState = &x00;
 }
