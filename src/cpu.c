@@ -81,6 +81,7 @@ void x02() {
 
 char imm4;
 char imm3;
+char imm2;
 char f1;
 char f2;
 char f3;
@@ -91,6 +92,7 @@ void x03() {
 
     imm4 = ir & 0x0F;
     imm3 = ir & 0x07;
+    imm2 = ir & 0x03;
     f1 = (ir & 0x08) != 0;
     f2 = (ir & 0x04) != 0;
     f3 = (ir & 0x02) != 0;
@@ -159,30 +161,21 @@ void x05() {
 
 void x06() {
     currentState = 0x06;
-    if(f1) /* Apply operation to the most significant nibble */
-	accumulator &= (imm4 << 4);
-    else /* Apply operation to the least significant nibble */
-	accumulator &= (imm4 & 0x0F);
+    accumulator &= (imm4 & 0x0F);
     setflags();
     nextState = &x00;
 }
 
 void x07() {
     currentState = 0x07;
-    if(f1) /* Apply operation to the most significant nibble */
-	accumulator |= (imm4 << 4);
-    else /* Apply operation to the least significant nibble */
-	accumulator |= (imm4 & 0x0F);
+    accumulator |= (imm4 & 0x0F);
     setflags();
     nextState = &x00;
 }
 
 void x08() {
     currentState = 0x08;
-    if(f1) /* Apply operation to the most significant nibble */
-	accumulator ^= (imm4 << 4);
-    else /* Apply operation to the least significant nibble */
-	accumulator ^= (imm4 & 0x0F);
+    accumulator ^= (imm4 & 0x0F);
     setflags();
     nextState = &x00;
 }
@@ -284,6 +277,7 @@ void x15() {
 	nextState = &x16;
 }
 
+/* STK Push */
 void x16() {
     currentState = 0x16;
     mar = ++mar | 0xFF00;
@@ -302,6 +296,7 @@ void x18() {
     nextState = &x11;
 }
 
+/* STK Pop */
 void x19() {
     currentState = 0x19;
     mdr = memory[mar];
@@ -310,15 +305,33 @@ void x19() {
 
 void x1A() {
     currentState = 0x1A;
-    accumulator += mdr;
-    setflags();
+    stackpt = (char)((mar - 1) & 0x00FF);
     nextState = &x1B;
 }
 
 void x1B() {
     currentState = 0x1B;
-    stackpt = (char)((mar - 1) & 0x00FF);
+    if(f2) {
+	switch(imm2) {
+	    case ADD:
+		accumulator += mdr;
+		break;
+	    case AND:
+		accumulator &= mdr;
+		break;
+	    case OR:
+		accumulator |= mdr;
+		break;
+	    default:
+		accumulator += mdr;
+		break;
+	}
+    } else {
+	accumulator = mdr;
+    }
+
     nextState = &x00;
+    setflags();
 }
 
 void x1C() {

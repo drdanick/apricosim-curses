@@ -57,7 +57,7 @@ As a test, the simulator loads the following instructions into memory:
 01010000  
 00001010  
 10100000  
-10101111
+10101100
 ```
 
 This sample program will place the value of 0xBA into the accumulator, 
