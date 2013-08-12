@@ -17,10 +17,39 @@ static void finish(int sig) {
     exit(0);
 }
 
+void loadProgram(char* filename) {
+    FILE* f = fopen(filename, "rb");
+    if(f != NULL) {
+	short magicnum = 0;
+	short size;
+
+	fread(&magicnum, 2, 1, f); 
+
+	if(magicnum != 0x4150) {
+	    fclose(f);
+	    return;
+	}
+
+	fread(&size, 2, 1, f);
+
+	int i = 0;
+	for(; i < size; i++) {
+	    fread(&memory[i], 1, 1, f);
+	}
+
+	fclose(f);
+	refreshMemoryDisplay();
+    }
+}
+
 int main(int argc, char** argv) {
     signal(SIGINT, finish);
     initgui();
     resetMachine();
+
+
+    if(argc > 1)
+	loadProgram(argv[1]);
 
     refresh();
     
