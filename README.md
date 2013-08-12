@@ -36,6 +36,15 @@ make install
 To run the simulator, enter `aprsim` in your shell.
 
 
+Using the simulator
+-------------------
+
+The simulator can be operated with the following controls:  
+`j/k` Scroll the memory display down/up.  
+`J/K` Scroll the stack display down/up.  
+`b`   Toggle a breakpoint.  
+`space` Execute one CPU cycle.  
+
 Notes
 -----
 
