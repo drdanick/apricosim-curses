@@ -33,4 +33,24 @@ make
 make install
 ```
 
-To run the simulator, enter `aprsim`.
+To run the simulator, enter `aprsim` in your shell.
+
+
+Notes
+-----
+
+As a test, the simulator loads the following instructions into memory:   
+```
+00001011  
+01010000  
+01010000  
+01010000  
+01010000  
+00001010  
+10100000  
+10101111
+```
+
+This sample program will place the value of 0xBA into the accumulator, 
+push the accumulator to the stack, then pop the stack, adding the popped 
+value to the acucmulator. The accumulator should hold the value of 2 * (0xBA).
