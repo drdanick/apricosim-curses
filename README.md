@@ -1,7 +1,7 @@
 Apricosim
 =========
 
-A cycle accurate simulator for the Apricos CPU architectore
+A cycle accurate simulator for the Apricos CPU architecture.
 
 
 
@@ -10,23 +10,24 @@ Dependencies
 
 This particular distribution of apricosim requires the following binaries:
 
-gcc 4.0.0+
-autoconf 2.65
+- gcc 4.0.0+
+- autoconf 2.65+
+- automake 1.11+
 
 
 The following libraries are also required:
 
-curses/ncurses
+- curses/ncurses
 
 
 Compiling
 ---------
 
-Before the makefiles can be generated, a configure script must first be generated.
-This can be done by entering `autoconf` in your shell.
-
-Afterwards, compiling the simulator is as simple as entering the following commands:
+Compiling the simulator is as simple as entering the following commands:
 ```no-highlight
+aclocal
+automake
+autoconf
 ./configure
 make
 make install
