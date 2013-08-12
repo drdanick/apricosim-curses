@@ -26,7 +26,7 @@ Compiling
 Compiling the simulator is as simple as entering the following commands:
 ```no-highlight
 aclocal
-automake
+automake --add-missing
 autoconf
 ./configure
 make
