@@ -30,7 +30,7 @@ automake
 autoconf
 ./configure
 make
-make install
+sudo make install
 ```
 
 To run the simulator, enter `aprsim` in your shell.
