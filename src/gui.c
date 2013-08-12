@@ -104,19 +104,15 @@ void refreshMemoryDisplay() {
 
     for(; i < mh - 2 && i + memdisplay < 65536; i++) {
 	printMemory(&mainmem, i, 0, i + memdisplay, memory[memdisplay + i], breakpoints[memdisplay + i], pc == (memdisplay + i));
-	/* TODO: print the binary value too! (And get rid of the test values below! */
-	/*wprintw(&mainmem, "0x");
-	printHexString(&mainmem, i + memdisplay, 16);
-	wprintw(&mainmem, ":\t");
-	printHexString(&mainmem, memory[memdisplay + i], 8);
-	wprintw(&mainmem, "\t");
-	printBinaryString(&mainmem, memory[memdisplay + i++], 8);
-	wprintw(&mainmem, "\n");*/
 
     }
     
+    /* TODO: move status to a seperate window */
+    mvwaddstr(&mainmem_b, mh - 1,4, "Current state: 0x");
+    printHexString(&mainmem_b, currentState, 8);
+    wprintw(&mainmem_b, "  Instructions executed: %d  Cycles Executed: %d  Cycle Mode: %s",instructionCount, cycleCount,cyclemode ? "C MODE" : "I MODE");
     wnoutrefresh(&mainmem);
-    /*wrefresh(&mainmem);*/
+    wnoutrefresh(&mainmem_b);
 }
 
 void refreshStackDisplay() {

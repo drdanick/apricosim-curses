@@ -32,4 +32,6 @@ int rx, ry, rw, rh, mx, my, mw, mh, sx, sy, sw, sh; /* GUI dimensions and coordi
 unsigned int memdisplay; /* Memory display offset */
 unsigned int stackdisplay; /* Stack display offset */
 
+char cyclemode;
+
 #endif /* GUI_H */

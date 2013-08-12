@@ -44,9 +44,10 @@ void loadProgram(char* filename) {
 
 int main(int argc, char** argv) {
     signal(SIGINT, finish);
+    cyclemode = 1;
+
     initgui();
     resetMachine();
-
 
     if(argc > 1)
 	loadProgram(argv[1]);
@@ -102,18 +103,18 @@ int main(int argc, char** argv) {
 
 	    wnoutrefresh(&stack);
 	} else if(c == ' ') {
-	    cycle();
-	    refreshMemoryDisplay();
-	    refreshStackDisplay();
-	    refreshRegisterDisplay();
-
-	    mvwaddstr(&mainmem_b, mh - 1,4, "Current state: 0x");
-	    printHexString(&mainmem_b, currentState, 8);
-	    wprintw(&mainmem_b, "  Instructions executed: %d  Cycles Executed: %d",instructionCount, cycleCount);
-	    wnoutrefresh(&mainmem_b);
+	    do {
+		cycle();
+		refreshMemoryDisplay();
+		refreshStackDisplay();
+		refreshRegisterDisplay();
+	    } while (!cyclemode && nextState != &x00);
 
 	} else if(c == 'b') {
 	    breakpoints[memdisplay] = (breakpoints[memdisplay] + 1) & 0x01;
+	    refreshMemoryDisplay();
+	} else if(c == 'm') {
+	    cyclemode ^= 0x01;
 	    refreshMemoryDisplay();
 	}
 	refresh();
