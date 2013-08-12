@@ -43,7 +43,7 @@ The simulator can be operated with the following controls:
 `j/k`   Scroll the memory display down/up.  
 `J/K`   Scroll the stack display down/up.  
 `b`     Toggle a breakpoint.  
-`m`     Toggle between state execution and instruction execution modes.
+`m`     Toggle between state execution and instruction execution modes.  
 `space` Execute one CPU state or instruction.  
 
 Notes
