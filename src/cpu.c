@@ -342,7 +342,7 @@ void x1C() {
 
 void x1D() {
     currentState = 0x1D;
-    mar += imm4;
+    mar += imm3;
     nextState = &x1E;
 }
 
