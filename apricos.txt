@@ -1,0 +1,249 @@
+====================
+Apricos Architecture
+====================
+
+64KB of main address space
+256 bytes of stack space (shared with main address space)
+
+8 bit ISA, 16 possible operations.
+
+
+7 registers:
+
+$ip 16-bit instruction pointer
+$mr 16-bit memory address register
+$dr 8-bit memory data register
+$ir 8-bit instruction register
+$sp 8-bit Stack register (Or stack pointer)
+$ar 8-bit accumulator
+$fr 8-bit CPU status flags register
+
+NOTES:
+$ip and $mr are actually adders connected to D flipflops, where the second operand is 4 bits wide.
+
+Flags register: [  .  .  .  .  S  N  Z  P  ]
+S = Sign extend mode
+N = Negative result
+Z = Zero result
+P = Positive result
+
+=====
+ ISA
+=====
+
+OP Code	|  Instruction	|  Description
+-----------------------------------------------------------------------------------------
+0000	|  ADD		|  Add a value to the accumulator
+0001	|  NOT		|  NOT the accumulator
+0010	|  AND		|  AND a value with the accumulator
+0011	|  OR		|  OR a value with the accumulator
+0100	|  XOR		|  XOR a value with the accumulator
+0101	|  SHF		|  SHIFT the accumulator either left or right
+0110	|  LD		|  Load a value from memory into the accumulator
+0111	|  LDI		|  Load a value from memory using an immediate PC offset
+1000	|  ST		|  Store the accumulator to memory
+1001	|  STI		|  Store the accumulator to memory using an immesiate PC offset
+1010	|  STK		|  Stack push/pop
+1011	|  LEA		|  Load the effective address of a PC offset into memory
+1100	|  BR		|  Branch
+1101	|  PRT		|  Port I/O
+1110	|  RESERVED	|  Reserved opcode
+1111	|  RESERVED	|  Reserved opcode
+
+===================
+Instruction details
+===================
+(x = don't care)
+((n) = operand size)
+
+-----
+ ADD
+-----
+
+0000 imm(4)
+
+$ar += imm
+
+
+-----
+ NOT
+-----
+
+0001 xxxx
+
+$ar = !$ar
+
+-----
+ AND
+-----
+
+0010 imm(4)
+
+$ar &= imm
+
+----
+ OR
+----
+
+0011 imm(4)
+
+$ar |= imm
+
+
+-----
+ XOR
+-----
+
+0011 imm(4)
+
+$ar ^= imm
+
+
+-----
+ SHF
+-----
+
+0101 direction(1) xxx
+
+if direction == 1:
+    $ar >> 1
+else
+    $ar << 1
+
+
+----
+ LD
+----
+
+0110 addressWrite(1) writeHigh(1) xx
+
+if addressWrite == 1:
+    if writeHigh == 1:
+        $mr |= ($ar << 8)
+    else
+        $mr |= ($ar)
+else
+    $ar = memory[$mr]
+
+
+-----
+ LDI
+-----
+
+0111 ipoffset(4)
+
+$ar = memory[$ip + ipoffset]
+
+
+----
+ ST
+----
+
+1000 addressWrite(1) writeHigh(1) xx
+
+if addressWrite == 1:
+    if writeHigh == 1:
+        $mr |= ($ar << 8)
+    else
+        $mr |= ($ar)
+else
+    memory[$mr] = $ar
+
+
+-----
+ STI
+-----
+
+0111 ipoffset(4)
+
+memory[$ip + ipoffset] = $ar
+
+
+-----
+ STK
+-----
+
+1010 pop(1) operation(3)
+
+if pop == 1:
+    if operation == 100b:
+        $ar += memory[$sp]
+
+    else if operation == 101b:
+        $ar &= memory[$sp]
+
+    else if operation == 111b:
+        $ar |= memory[$sp] 
+
+    else:
+        $ar = memory[$sp]
+
+    $sp = $sp - 1
+
+else:
+    $sp = $sp + 1
+    memory[$sp] = $ar
+
+-----
+ LEA
+-----
+
+1011 getMSB(1) ipOffset(3)
+
+if getMSB == 1:
+    $ar = ($ip + ipOffset) >> 8
+else:
+    $ar = ($ip + ipOffset) & 0x00FF
+
+----
+ BR
+----
+
+1100 n(1) z(1) p(1) x
+
+if (n == 1 && $fr[N] == 1) || (z == 1 && $fr[Z] == 1) || (p == 1 && $fr[P] == 1):
+    $ip = $mr
+
+
+-----
+ PRT
+-----
+
+1101 direction(1) id(3)
+
+if direction == 1
+    write data to port #id
+else
+    read data from port #id
+
+
+
+========================
+Assembly language format
+========================
+
+imm3 = 3 bit immediate value
+imm4 = 4 bit immediate value
+
+ADD: ADD imm4
+NOT: NOT imm4
+AND: AND imm4
+OR:  OR imm4
+XOR: XOR imm4
+SHF: SHFl/SHFr
+LD:  LD/LDa
+LDI: LDI imm4
+ST:  ST
+STI: STI imm4
+STK: 
+     SPUSH
+     SPOP
+     SPOP ADD
+     SPOP AND
+     SPOP OR
+LEA: LEAl/LEAh imm4
+BR:
+     BR{n,z,p} (i.e.  BR, BRn, BRz, BRnz, BRnzp, etc)
+PRT:
+     PRTin [0-7]
+     PRTout [0-7]
