@@ -76,19 +76,21 @@ void setflags() {
 
 void x00() {
     currentState = 0x00;
-    mar = pc;
+    mdr = memory[pc];
+    /*mar = pc;*/
     nextState = &x01;
 }
 
 void x01() {
     currentState = 0x01;
     pc++;
-    nextState = &x02;
+    nextState = &x03;
 }
 
 void x02() {
+    /* This state is no longer used */
     currentState = 0x02;
-    mdr = memory[mar];
+    /*mdr = memory[mar];*/
     nextState = &x03;
 }
 
