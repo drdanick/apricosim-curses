@@ -51,7 +51,7 @@ void initDimensions(int maxX, int maxY) {
     ry = 0;
     rw = maxX;
     /*rh = maxY / 3;*/
-    rh = 10;
+    rh = 13;
     
     mx = 0;
     my = rh;
@@ -67,14 +67,17 @@ void initDimensions(int maxX, int maxY) {
 
 void refreshRegisterDisplay() {
     werase(&registers);
-    printRegister(&registers, "Accumulator     ", "\n", accumulator, 8);
-    printRegister(&registers, "Stack Pointer   ", "\n", stackpt, 8);
-    printRegister(&registers, "CPU Flags       ", "\n", flags, 8);
+    printRegister(&registers, "Accumulator       ", "\n", accumulator, 8);
+    printRegister(&registers, "Swp Accumulator 1 ", "\n", swapaccum[0], 8);
+    printRegister(&registers, "Swp Accumulator 2 ", "\n", swapaccum[1], 8);
+    printRegister(&registers, "Tmp Accumulator   ", "\n", swapaccum[2], 8);
+    printRegister(&registers, "Stack Pointer     ", "\n", stackpt, 8);
+    printRegister(&registers, "CPU Flags         ", "\n", flags, 8);
     waddstr(&registers, "\n");
-    printRegister(&registers, "MDR             ", "\n", mdr, 8);
-    printRegister(&registers, "IR              ", "\n", ir, 8);
-    printRegister(&registers, "Program Counter ", "\n", pc, 16);
-    printRegister(&registers, "MAR             ", "\n", mar, 16);
+    printRegister(&registers, "MDR               ", "\n", mdr, 8);
+    printRegister(&registers, "IR                ", "\n", ir, 8);
+    printRegister(&registers, "Program Counter   ", "\n", pc, 16);
+    printRegister(&registers, "MAR               ", "\n", mar, 16);
 
     /*wrefresh(&registers);*/
 

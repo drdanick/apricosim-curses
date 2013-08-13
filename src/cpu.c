@@ -31,6 +31,7 @@ void resetMachine() { /* Clear the registers */
     /* Clear the main memory block */
     memset(memory, 0, 65536);
     memset(breakpoints, 0, 65536);
+    memset(swapaccum, 0, 3);
 
     stackmem = &memory[65536 - 256];
 
@@ -150,7 +151,10 @@ void x03() {
 	    nextState = &x1F;
 	    break;
 	case PRT:
-	    nextState = &x100;
+	    nextState = &x20;
+	    break;
+	case SWP:
+	    nextState = &x21;
 	    break;
 	default:
 	    nextState = &exception;
@@ -376,9 +380,23 @@ void x1F() {
     nextState = &x00;
 }
 
-void x100() {
-    currentState = 0xFE;
+void x20() {
+    currentState = 0x20;
     /* NO CONNECTED PERIPHERALS */
+    nextState = &x00;
+}
+
+void x21() {
+    currentState = 0x21;
+    /* move current accumulator into accumulator buffer */
+    swapaccum[2] = accumulator;
+    nextState = &x22;
+}
+
+void x22() {
+    currentState = 0x22;
+    accumulator = swapaccum[f1];
+    swapaccum[f1] = swapaccum[2];
     nextState = &x00;
 }
 

@@ -47,7 +47,7 @@ OP Code	|  Instruction	|  Description
 1011	|  LEA		|  Load the effective address of a PC offset into memory
 1100	|  BR		|  Branch
 1101	|  PRT		|  Port I/O
-1110	|  RESERVED	|  Reserved opcode
+1110	|  SWAP  	|  Swap the accumulator with a temporary accumulator
 1111	|  RESERVED	|  Reserved opcode
 
 ===================
@@ -216,6 +216,14 @@ if direction == 1
 else
     read data from port #id
 
+
+-----
+ SWP
+-----
+
+1110 aID(1) xxx
+
+swap temporary accumulator #aID with accumulator
 
 
 ========================

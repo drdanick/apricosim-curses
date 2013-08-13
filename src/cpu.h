@@ -47,7 +47,11 @@ void x1D();
 void x1E();
 void x1F();
 
-void x100();
+void x20();
+
+/* States required for SWP */
+void x21();
+void x22();
 
 void exception();
 
@@ -66,6 +70,7 @@ void exception();
 #define LEA  11
 #define BR   12
 #define PRT  13
+#define SWP  14
 
 /* CPU Flags */
 #define SIG_FLAG 0x08
@@ -84,6 +89,7 @@ void (*nextState)();
 
 /* Registers */
 unsigned char stackpt, accumulator, flags, mdr, ir;
+unsigned char swapaccum[3];
 unsigned short mar; /* Memory Address Register */
 unsigned short pc; /* Program Counter */
 
