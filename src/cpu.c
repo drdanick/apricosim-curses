@@ -397,6 +397,7 @@ void x22() {
     currentState = 0x22;
     accumulator = swapaccum[f1];
     swapaccum[f1] = swapaccum[2];
+    setflags();
     nextState = &x00;
 }
 
