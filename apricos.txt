@@ -8,15 +8,17 @@ Apricos Architecture
 8 bit ISA, 16 possible operations.
 
 
-7 registers:
+10 registers:
 
-$ip 16-bit instruction pointer
-$mr 16-bit memory address register
-$dr 8-bit memory data register
-$ir 8-bit instruction register
-$sp 8-bit Stack register (Or stack pointer)
-$ar 8-bit accumulator
-$fr 8-bit CPU status flags register
+$ip    16-bit instruction pointer
+$mr    16-bit memory address register
+$dr    8-bit memory data register
+$ir    8-bit instruction register
+$sp    8-bit Stack register (Or stack pointer)
+$ar    8-bit accumulator
+$ta1-2 8-bit temporary accumulators
+$ba    8-bit temporary buffer acucmulator
+$fr    8-bit CPU status flags register
 
 NOTES:
 $ip and $mr are actually adders connected to D flipflops, where the second operand is 4 bits wide.
@@ -47,7 +49,7 @@ OP Code	|  Instruction	|  Description
 1011	|  LEA		|  Load the effective address of a PC offset into memory
 1100	|  BR		|  Branch
 1101	|  PRT		|  Port I/O
-1110	|  SWAP  	|  Swap the accumulator with a temporary accumulator
+1110	|  SWP  	|  Swap the accumulator with a temporary accumulator
 1111	|  RESERVED	|  Reserved opcode
 
 ===================
@@ -255,3 +257,5 @@ BR:
 PRT:
      PRTin [0-7]
      PRTout [0-7]
+SWP:
+     SWP $a{1|2}
