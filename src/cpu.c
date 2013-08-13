@@ -288,42 +288,51 @@ void x14() {
 
 void x15() {
     currentState = 0x15;
-    mar = (0xFF00 | (short)stackpt);
+    /*mar = (0xFF00 | (short)stackpt);*/
     if(f1)
 	nextState = &x19;
     else
-	nextState = &x16;
+	nextState = &x17;
 }
 
 /* STK Push */
 void x16() {
-    currentState = 0x16;
-    mar = ++mar | 0xFF00;
-    nextState = &x17;
+    /* Replacement for x11 used by x1B */
+    memory[stackpt] = mdr;
+    nextState = &x00;
+
+
+
+    /* No longer needed */
+    /*currentState = 0x16;*/
+    /*mar = ++mar | 0xFF00;*/
+    /*nextState = &x17;*/
 }
 
 void x17() {
     currentState = 0x17;
-    stackpt = (char)(mar & 0x00FF);
+    /*stackpt = (char)(mar & 0x00FF);*/
+    stackpt = ++stackpt & 0x00FF;
     nextState = &x18;
 }
 
 void x18() {
     currentState = 0x18;
     mdr = accumulator;
-    nextState = &x11;
+    /*nextState = &x11;*/
+    nextState = &x16;
 }
 
 /* STK Pop */
 void x19() {
     currentState = 0x19;
-    mdr = memory[mar];
+    mdr = memory[stackpt];
     nextState = &x1A;
 }
 
 void x1A() {
     currentState = 0x1A;
-    stackpt = (char)((mar - 1) & 0x00FF);
+    stackpt = (char)((stackpt - 1) & 0x00FF);
     nextState = &x1B;
 }
 
