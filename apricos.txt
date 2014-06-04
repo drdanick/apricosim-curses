@@ -156,7 +156,7 @@ else
  STI
 -----
 
-0111 ipoffset(4)
+1001 ipoffset(4)
 
 memory[$ip + ipoffset] = $ar
 
