@@ -241,9 +241,9 @@ AND: AND imm4
 OR:  OR imm4
 XOR: XOR imm4
 SHF: SHFl/SHFr
-LD:  LD/LDa
+LD:  LD/LDal/LDah
 LDI: LDI imm4
-ST:  ST
+ST:  ST/STal/STah
 STI: STI imm4
 STK: 
      SPUSH
@@ -258,4 +258,4 @@ PRT:
      PRTin [0-7]
      PRTout [0-7]
 SWP:
-     SWP $a{1|2}
+     SWP {1|2}
