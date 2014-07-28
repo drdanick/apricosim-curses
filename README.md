@@ -24,7 +24,7 @@ Compiling
 ---------
 
 Compiling the simulator is as simple as entering the following commands:
-```no-highlight
+```
 aclocal
 automake --add-missing
 autoconf
@@ -46,3 +46,9 @@ The simulator can be operated with the following controls:
 `m`     Toggle between state execution and instruction execution modes.  
 `space` Execute one CPU state or instruction.  
 `q`     Quit the simulator
+
+
+Licence
+-------
+
+See LICENCE for details.
