@@ -15,9 +15,7 @@ $mr    16-bit memory address register
 $dr    8-bit memory data register
 $ir    8-bit instruction register
 $sp    8-bit Stack register (Or stack pointer)
-$ar    8-bit accumulator
-$ta1-2 8-bit temporary accumulators
-$ba    8-bit temporary buffer acucmulator
+$ar1-4 4 8-bit accumulators
 $fr    8-bit CPU status flags register
 
 NOTES:
@@ -55,8 +53,9 @@ OP Code	|  Instruction	|  Description
 ===================
 Instruction details
 ===================
-(x = don't care)
-((n) = operand size)
+x = don't care
+(n) = operand size
+$ar = currently selected accumulator
 
 -----
  ADD
