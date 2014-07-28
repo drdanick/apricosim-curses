@@ -3,6 +3,11 @@
 ===========================
 
 
+ V0.6.1
+----------
+ * Updated ALU OpCodes
+ * SPOP now supports XOR operation
+
  V0.6
 ----------
  * Replaced accumulator swap scheme with an accumulator multiplexor scheme
