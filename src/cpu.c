@@ -108,9 +108,6 @@ void x03() {
     case ADD:
         nextState = &x04;
         break;
-    case NOT:
-        nextState = &x05;
-        break;
     case AND:
         nextState = &x06;
         break;
@@ -119,6 +116,9 @@ void x03() {
         break;
     case XOR:
         nextState = &x08;
+        break;
+    case NOT:
+        nextState = &x05;
         break;
     case SHF:
         nextState = &x09;
@@ -336,8 +336,8 @@ void x1B() {
         case OR:
             accumulator[amux] |= mdr;
             break;
-        default:
-            accumulator[amux] = mdr;
+        case XOR:
+            accumulator[amux] ^= mdr;
             break;
         }
     } else {

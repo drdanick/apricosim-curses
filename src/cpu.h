@@ -56,10 +56,10 @@ void exception();
 
 /* OP Codes */
 #define ADD   0
-#define NOT   1
-#define AND   2
-#define OR    3
-#define XOR   4
+#define AND   1
+#define OR    2
+#define XOR   3
+#define NOT   4
 #define SHF   5
 #define LD    6
 #define LDI   7
