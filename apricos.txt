@@ -34,10 +34,10 @@ P = Positive result
 OP Code	|  Instruction	|  Description
 -----------------------------------------------------------------------------------------
 0000	|  ADD		|  Add a value to the accumulator
-0001	|  NOT		|  NOT the accumulator
-0010	|  AND		|  AND a value with the accumulator
-0011	|  OR		|  OR a value with the accumulator
-0100	|  XOR		|  XOR a value with the accumulator
+0001	|  AND		|  AND a value with the accumulator
+0010	|  OR		|  OR a value with the accumulator
+0011	|  XOR		|  XOR a value with the accumulator
+0100	|  NOT		|  NOT the accumulator
 0101	|  SHF		|  SHIFT the accumulator either left or right
 0110	|  LD		|  Load a value from memory into the accumulator
 0111	|  LDI		|  Load a value from memory using an immediate PC offset
@@ -65,20 +65,11 @@ $ar = currently selected accumulator
 
 $ar += imm
 
-
------
- NOT
------
-
-0001 xxxx
-
-$ar = !$ar
-
 -----
  AND
 -----
 
-0010 imm(4)
+0001 imm(4)
 
 $ar &= imm
 
@@ -86,7 +77,7 @@ $ar &= imm
  OR
 ----
 
-0011 imm(4)
+0010 imm(4)
 
 $ar |= imm
 
@@ -99,6 +90,13 @@ $ar |= imm
 
 $ar ^= imm
 
+-----
+ NOT
+-----
+
+0100 xxxx
+
+$ar = !$ar
 
 -----
  SHF
@@ -170,11 +168,14 @@ if pop == 1:
     if operation == 100b:
         $ar += memory[$sp]
 
-    else if operation == 110b:
+    else if operation == 101b:
         $ar &= memory[$sp]
 
-    else if operation == 111b:
+    else if operation == 110b:
         $ar |= memory[$sp] 
+
+    else if operation == 111b:
+        $ar ^= memory[$sp] 
 
     else:
         $ar = memory[$sp]
@@ -250,6 +251,7 @@ STK:
      SPOP ADD
      SPOP AND
      SPOP OR
+     SPOP XOR
 LEA: LEAl/LEAh imm4
 BR:
      BR{n,z,p} (i.e.  BR, BRn, BRz, BRnz, BRnzp, etc)
