@@ -1,8 +1,3 @@
-/*
- * APRICOS CPU ROUTINES
- *
- * 2013 - Nick Stones-Havas
- */
 #include "cpu.h"
 #include "gui.h"
 
