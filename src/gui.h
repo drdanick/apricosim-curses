@@ -10,7 +10,7 @@ void refreshRegisterDisplay();
 void printMemory(WINDOW* win, int y, int x, int address, int value, int is_breakpoint, int is_pointed_to); 
 void refreshMemoryDisplay();
 void refreshStackDisplay();
-void printRegister(WINDOW* win, char* name, char* suffix, int value, int size);
+void printRegister(WINDOW* win, char* name, char* suffix, int value, int size, char mark);
 void printBinaryString(WINDOW* win, unsigned int num, unsigned int size);
 void printHexString(WINDOW* win, unsigned int num, unsigned int size);
 

@@ -1,0 +1,16 @@
+===========================
+ APRICOSIM VERSION HISTORY
+===========================
+
+
+ V0.6
+----------
+ * Replaced accumulator swap scheme with an accumulator multiplexor scheme
+ * Replaced SWP instruction with ASET instruction
+ * Updated GUI to reflect instruction changes
+ * Pressing q will now quit the simulator
+ * Debug program is no longer loaded into memory
+
+ V0.5
+----------
+ * Initial Release

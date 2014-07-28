@@ -1,6 +1,6 @@
 # Compiler flags
-CFLAGS = -std=c89 -O2
-LDFLAGS = -lcurses 
+AM_CFLAGS = -std=c89 -O2
+LDADD = -lcurses 
 
 # Binaries
 bin_PROGRAMS = aprsim

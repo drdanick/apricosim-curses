@@ -49,7 +49,7 @@ OP Code	|  Instruction	|  Description
 1011	|  LEA		|  Load the effective address of a PC offset into memory
 1100	|  BR		|  Branch
 1101	|  PRT		|  Port I/O
-1110	|  SWP  	|  Swap the accumulator with a temporary accumulator
+1110	|  ASET  	|  Set the current active accumulator
 1111	|  RESERVED	|  Reserved opcode
 
 ===================
@@ -171,7 +171,7 @@ if pop == 1:
     if operation == 100b:
         $ar += memory[$sp]
 
-    else if operation == 101b:
+    else if operation == 110b:
         $ar &= memory[$sp]
 
     else if operation == 111b:
@@ -219,13 +219,13 @@ else
     read data from port #id
 
 
------
- SWP
------
+------
+ ASET
+------
 
-1110 aID(1) xxx
+1110 xx aID(2)
 
-swap temporary accumulator #aID with accumulator
+Set the current active accumulator to accumulator #aID
 
 
 ========================
@@ -257,5 +257,5 @@ BR:
 PRT:
      PRTin [0-7]
      PRTout [0-7]
-SWP:
-     SWP {1|2}
+ASET:
+     ASET [0-3]

@@ -1,7 +1,6 @@
 #ifndef CPU_H
 #define CPU_H
 
-#include <curses.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <stdio.h>
@@ -56,21 +55,21 @@ void x22();
 void exception();
 
 /* OP Codes */
-#define ADD  0
-#define NOT  1
-#define AND  2
-#define OR   3
-#define XOR  4
-#define SHF  5
-#define LD   6
-#define LDI  7
-#define ST   8
-#define STI  9
-#define STK  10
-#define LEA  11
-#define BR   12
-#define PRT  13
-#define SWP  14
+#define ADD   0
+#define NOT   1
+#define AND   2
+#define OR    3
+#define XOR   4
+#define SHF   5
+#define LD    6
+#define LDI   7
+#define ST    8
+#define STI   9
+#define STK   10
+#define LEA   11
+#define BR    12
+#define PRT   13
+#define ASET  14
 
 /* CPU Flags */
 #define SIG_FLAG 0x08
@@ -88,13 +87,15 @@ int cycleCount, instructionCount;
 void (*nextState)();
 
 /* Registers */
-unsigned char stackpt, accumulator, flags, mdr, ir;
-unsigned char swapaccum[3];
-unsigned short mar; /* Memory Address Register */
-unsigned short pc; /* Program Counter */
+unsigned char  stackpt, flags, mdr, ir;
+unsigned char  accumulator[4];
+unsigned char  swapaccum[3];
+unsigned short mar;  /* Memory Address Register */
+unsigned short pc;   /* Program Counter */
+unsigned char  amux; /* Accumulator MUX pointer */
 
 /* Memory blocks */
-unsigned char memory[65536]; 
+unsigned char memory[65536];
 unsigned char breakpoints[65536];
 unsigned char* stackmem;
 

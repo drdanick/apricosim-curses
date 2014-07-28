@@ -45,22 +45,4 @@ The simulator can be operated with the following controls:
 `b`     Toggle a breakpoint.  
 `m`     Toggle between state execution and instruction execution modes.  
 `space` Execute one CPU state or instruction.  
-
-Notes
------
-
-As a test, the simulator loads the following instructions into memory:   
-```
-00001011  
-01010000  
-01010000  
-01010000  
-01010000  
-00001010  
-10100000  
-10101100
-```
-
-This sample program will place the value of 0xBA into the accumulator, 
-push the accumulator to the stack, then pop the stack, adding the popped 
-value to the acucmulator. The accumulator should hold the value of 2 * (0xBA).
+`q`     Quit the simulator

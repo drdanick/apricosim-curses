@@ -4,7 +4,6 @@
 void initgui() {
     int maxX, maxY;
     initscr();
-    /*keypad(stdscr, TRUE);*/
     nonl();
     cbreak();
     noecho();
@@ -50,7 +49,6 @@ void initDimensions(int maxX, int maxY) {
     rx = 0;
     ry = 0;
     rw = maxX;
-    /*rh = maxY / 3;*/
     rh = 13;
     
     mx = 0;
@@ -67,19 +65,18 @@ void initDimensions(int maxX, int maxY) {
 
 void refreshRegisterDisplay() {
     werase(&registers);
-    printRegister(&registers, "Accumulator       ", "\n", accumulator, 8);
-    printRegister(&registers, "Swp Accumulator 1 ", "\n", swapaccum[0], 8);
-    printRegister(&registers, "Swp Accumulator 2 ", "\n", swapaccum[1], 8);
-    printRegister(&registers, "Tmp Accumulator   ", "\n", swapaccum[2], 8);
-    printRegister(&registers, "Stack Pointer     ", "\n", stackpt, 8);
-    printRegister(&registers, "CPU Flags         ", "\n", flags, 8);
+    printRegister(&registers, "Accumulator 0     ", "\n", accumulator[0], 8, (amux == 0));
+    printRegister(&registers, "Accumulator 1     ", "\n", accumulator[1], 8, (amux == 1));
+    printRegister(&registers, "Accumulator 2     ", "\n", accumulator[2], 8, (amux == 2));
+    printRegister(&registers, "Accumulator 3     ", "\n", accumulator[3], 8, (amux == 3));
+    printRegister(&registers, "Stack Pointer     ", "\n", stackpt, 8, 0);
+    printRegister(&registers, "CPU Flags         ", "\n", flags, 8, 0);
     waddstr(&registers, "\n");
-    printRegister(&registers, "MDR               ", "\n", mdr, 8);
-    printRegister(&registers, "IR                ", "\n", ir, 8);
-    printRegister(&registers, "Program Counter   ", "\n", pc, 16);
-    printRegister(&registers, "MAR               ", "\n", mar, 16);
+    printRegister(&registers, "MDR               ", "\n", mdr, 8, 0);
+    printRegister(&registers, "IR                ", "\n", ir, 8, 0);
+    printRegister(&registers, "Program Counter   ", "\n", pc, 16, 0);
+    printRegister(&registers, "MAR               ", "\n", mar, 16, 0);
 
-    /*wrefresh(&registers);*/
 
     wnoutrefresh(&registers);
 
@@ -91,14 +88,12 @@ void printMemory(WINDOW* win, int y, int x, int address, int value, int is_break
     waddstr(win, is_pointed_to ? ">" : " ");
     waddstr(win, is_breakpoint ? "   @0x" : "    0x");
     
-    /*mvwprintw(win, y, x, "0x");*/
     printHexString(win, address, 16);
     wprintw(win, ":\t");
     printHexString(win, value, 8);
     wprintw(win, "\t");
 
     printBinaryString(win, value, 8);
-    /*wprintw(win, "\n");*/
 }
 
 void refreshMemoryDisplay() {
@@ -106,7 +101,7 @@ void refreshMemoryDisplay() {
     werase(&mainmem);
 
     for(; i < mh - 2 && i + memdisplay < 65536; i++) {
-	printMemory(&mainmem, i, 0, i + memdisplay, memory[memdisplay + i], breakpoints[memdisplay + i], pc == (memdisplay + i));
+        printMemory(&mainmem, i, 0, i + memdisplay, memory[memdisplay + i], breakpoints[memdisplay + i], pc == (memdisplay + i));
 
     }
     
@@ -123,39 +118,33 @@ void refreshStackDisplay() {
     werase(&stack);
 
     for(; i < sh - 2 && i + stackdisplay < 256; i++) {
-	printMemory(&stack, i, 0, i + stackdisplay, stackmem[stackdisplay + i], 0, stackpt == (stackdisplay + i));
-	/*wprintw(&stack, "0x");
-	printHexString(&stack, i + stackdisplay, 16);
-	wprintw(&stack, ":\t");
-	printHexString(&stack, stackmem[stackdisplay + i], 8);
-	wprintw(&stack, "\t");
-	printBinaryString(&stack, stackmem[stackdisplay + i++], 8);
-	wprintw(&stack, "\n");*/
-
+        printMemory(&stack, i, 0, i + stackdisplay, stackmem[stackdisplay + i], 0, stackpt == (stackdisplay + i));
     }
     wnoutrefresh(&stack);
     
 }
 
-void printRegister(WINDOW* win, char* name, char* suffix, int value, int size) {
+void printRegister(WINDOW* win, char* name, char* suffix, int value, int size, char mark) {
     wprintw(win, "[%s:  %d\t:: 0x", name, value);
     printHexString(win, value, size);
     wprintw(win, " :: ");
     printBinaryString(win, value, size);
-    wprintw(win, "b\t]%s",suffix);
+    if(mark)
+        wprintw(win, "b\t*]%s",suffix);
+    else
+        wprintw(win, "b\t ]%s",suffix);
 }
 
 void printBinaryString(WINDOW* win, unsigned int num, unsigned int size) {
     while(size > 0) {
-	waddch(win, (num >> --size) & 0x01 ? '1' : '0');
+        waddch(win, (num >> --size) & 0x01 ? '1' : '0');
     }
 }
 
 void printHexString(WINDOW* win, unsigned int num, unsigned int size) {
     while(size > 0) {
-	waddch(win, HEX[(num >> size - 4) & 0x0F]);
+        waddch(win, HEX[(num >> size - 4) & 0x0F]);
 
-	/*num >>= 4;*/
-	size -= 4;
+        size -= 4;
     }
 }
