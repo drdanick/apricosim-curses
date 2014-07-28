@@ -315,9 +315,6 @@ void x1A() {
     nextState = &x1B;
 }
 
-/* TODO: Since there are 4 ALU OPS, the ISA needs to be modified 
- * such that ALU ops need only 2 bits to be identified, not 3.
- */
 void x1B() {
     currentState = 0x1B;
     if(f2) {
