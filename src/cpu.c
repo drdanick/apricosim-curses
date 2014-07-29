@@ -48,17 +48,16 @@ void cycle() {
 }
 
 void setflags() {
-    int sigTemp = flags & SIG_FLAG;
-    flags = 0;
+    /* Clear arithmetic flags */
+    flags &= ~(NEG_FLAG | POS_FLAG | ZER_FLAG);
 
-    if(accumulator[amux] < 0 && flags & SIG_FLAG)
+    if(accumulator[amux] & 0x80) /* Mimics hardware implementation */
         flags |= NEG_FLAG;
     else if(accumulator[amux])
         flags |= POS_FLAG;
     else
         flags |= ZER_FLAG;
 
-    flags |= sigTemp;
 }
 
 

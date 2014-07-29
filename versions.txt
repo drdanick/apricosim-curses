@@ -3,6 +3,10 @@
 ===========================
 
 
+ V0.7.1
+----------
+ * Negative status flag is now set regardless of sign extend mode.
+
  V0.7
 ----------
  * Added 12 more acumulators. There are now 16 in total.
