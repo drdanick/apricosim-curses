@@ -54,6 +54,9 @@ void x22();
 
 void exception();
 
+/* Misc. Constants */
+#define ACCUMULATOR_COUNT 16
+
 /* OP Codes */
 #define ADD   0
 #define AND   1
@@ -88,8 +91,7 @@ void (*nextState)();
 
 /* Registers */
 unsigned char  stackpt, flags, mdr, ir;
-unsigned char  accumulator[4];
-unsigned char  swapaccum[3];
+unsigned char  accumulator[ACCUMULATOR_COUNT];
 unsigned short mar;  /* Memory Address Register */
 unsigned short pc;   /* Program Counter */
 unsigned char  amux; /* Accumulator MUX pointer */

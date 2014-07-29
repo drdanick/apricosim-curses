@@ -3,6 +3,7 @@
 
 void initgui() {
     int maxX, maxY;
+    rdisplaymode = 1;
     initscr();
     nonl();
     cbreak();
@@ -62,20 +63,52 @@ void initDimensions(int maxX, int maxY) {
     sh = mh;
 }
 
-
 void refreshRegisterDisplay() {
     werase(&registers);
-    printRegister(&registers, "Accumulator 0     ", "\n", accumulator[0], 8, (amux == 0));
-    printRegister(&registers, "Accumulator 1     ", "\n", accumulator[1], 8, (amux == 1));
-    printRegister(&registers, "Accumulator 2     ", "\n", accumulator[2], 8, (amux == 2));
-    printRegister(&registers, "Accumulator 3     ", "\n", accumulator[3], 8, (amux == 3));
-    printRegister(&registers, "Stack Pointer     ", "\n", stackpt, 8, 0);
-    printRegister(&registers, "CPU Flags         ", "\n", flags, 8, 0);
-    waddstr(&registers, "\n");
-    printRegister(&registers, "MDR               ", "\n", mdr, 8, 0);
-    printRegister(&registers, "IR                ", "\n", ir, 8, 0);
-    printRegister(&registers, "Program Counter   ", "\n", pc, 16, 0);
-    printRegister(&registers, "MAR               ", "\n", mar, 16, 0);
+
+    if(rdisplaymode) { 
+        printRegister(&registers, "A0", "", accumulator[0], 8, (amux == 0));
+        printRegister(&registers, "A8", "\n", accumulator[8], 8, (amux == 8));
+
+        printRegister(&registers, "A1", "", accumulator[1], 8, (amux == 1));
+        printRegister(&registers, "A9", "\n", accumulator[9], 8, (amux == 9));
+
+        printRegister(&registers, "A2", "", accumulator[2], 8, (amux == 2));
+        printRegister(&registers, "A10", "\n", accumulator[10], 8, (amux == 10));
+
+        printRegister(&registers, "A3", "", accumulator[3], 8, (amux == 3));
+        printRegister(&registers, "A11", "\n", accumulator[11], 8, (amux == 11));
+
+        printRegister(&registers, "A4", "", accumulator[4], 8, (amux == 4));
+        printRegister(&registers, "A12", "\n", accumulator[12], 8, (amux == 12));
+
+        printRegister(&registers, "A5", "", accumulator[5], 8, (amux == 5));
+        printRegister(&registers, "A13", "\n", accumulator[13], 8, (amux == 13));
+
+        printRegister(&registers, "A6", "", accumulator[6], 8, (amux == 6));
+        printRegister(&registers, "A14", "\n", accumulator[14], 8, (amux == 14));
+
+        printRegister(&registers, "A7", "", accumulator[7], 8, (amux == 7));
+        printRegister(&registers, "A15", "\n", accumulator[15], 8, (amux == 15));
+
+        waddstr(&registers, "\n");
+        waddstr(&registers, "\n");
+        printRegister(&registers, "Program Counter   ", "\n", pc, 16, 0);
+
+
+    } else {
+        printRegister(&registers, "CPU Flags         ", "\n", flags, 8, 0);
+        printRegister(&registers, "MDR               ", "\n", mdr, 8, 0);
+        printRegister(&registers, "IR                ", "\n", ir, 8, 0);
+        printRegister(&registers, "Stack Pointer     ", "\n", stackpt, 8, 0);
+        printRegister(&registers, "MAR               ", "\n", mar, 16, 0);
+        waddstr(&registers, "\n");
+        waddstr(&registers, "\n");
+        waddstr(&registers, "\n");
+        waddstr(&registers, "\n");
+        waddstr(&registers, "\n");
+        printRegister(&registers, "Program Counter   ", "\n", pc, 16, 0);
+    }
 
 
     wnoutrefresh(&registers);
@@ -125,14 +158,14 @@ void refreshStackDisplay() {
 }
 
 void printRegister(WINDOW* win, char* name, char* suffix, int value, int size, char mark) {
-    wprintw(win, "[%s:  %d\t:: 0x", name, value);
+    wprintw(win, "[%-4s: %-5d :: 0x", name, value);
     printHexString(win, value, size);
     wprintw(win, " :: ");
     printBinaryString(win, value, size);
     if(mark)
-        wprintw(win, "b\t*]%s",suffix);
+        wprintw(win, "b *]%s",suffix);
     else
-        wprintw(win, "b\t ]%s",suffix);
+        wprintw(win, "b  ]%s",suffix);
 }
 
 void printBinaryString(WINDOW* win, unsigned int num, unsigned int size) {

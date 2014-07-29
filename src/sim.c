@@ -98,7 +98,10 @@ int main(int argc, char** argv) {
         } else if(c == 'm') {
             cyclemode ^= 0x01;
             refreshMemoryDisplay();
-        } else if(c == 'q' || c == 'Q') {
+        } else if(c == 'r'){
+            rdisplaymode = !rdisplaymode;
+            refreshRegisterDisplay();
+        }else if(c == 'q' || c == 'Q') {
             break;
         }
         refresh();

@@ -3,17 +3,19 @@
 
 
 void resetMachine() { /* Clear the registers */
-    stackpt = 255;
-    accumulator[0] = 0;
-    accumulator[1] = 0;
-    accumulator[2] = 0;
-    accumulator[3] = 0;
+    int i;
+
     flags = 0;
     mdr = 0;
     ir = 0;
     mar = 0;
     pc = 0;
     amux = 0;
+    stackpt = 255;
+
+    for(i = 0; i < ACCUMULATOR_COUNT; i++)
+        accumulator[i] = 0;
+
 
     nextState = &x00;
     currentState = 0;
@@ -30,7 +32,6 @@ void resetMachine() { /* Clear the registers */
     /* Clear the main memory block */
     memset(memory, 0, 65536);
     memset(breakpoints, 0, 65536);
-    memset(swapaccum, 0, 3);
 
     stackmem = &memory[65536 - 256];
 
@@ -386,7 +387,7 @@ void x21() {
 
 void x22() {
     currentState = 0x22;
-    amux = imm2;
+    amux = imm4;
     setflags();
     nextState = &x00;
 }

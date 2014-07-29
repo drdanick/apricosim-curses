@@ -223,7 +223,7 @@ else
  ASET
 ------
 
-1110 xx aID(2)
+1110 aID(4)
 
 Set the current active accumulator to accumulator #aID
 
@@ -259,4 +259,4 @@ PRT:
      PRTin [0-7]
      PRTout [0-7]
 ASET:
-     ASET [0-3]
+     ASET [0-15]

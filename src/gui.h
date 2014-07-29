@@ -33,5 +33,6 @@ unsigned int memdisplay; /* Memory display offset */
 unsigned int stackdisplay; /* Stack display offset */
 
 char cyclemode;
+char rdisplaymode;
 
 #endif /* GUI_H */
