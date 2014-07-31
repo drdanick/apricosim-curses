@@ -227,36 +227,3 @@ else
 
 Set the current active accumulator to accumulator #aID
 
-
-========================
-Assembly language format
-========================
-
-imm3 = 3 bit immediate value
-imm4 = 4 bit immediate value
-
-ADD: ADD imm4
-NOT: NOT imm4
-AND: AND imm4
-OR:  OR imm4
-XOR: XOR imm4
-SHF: SHFl/SHFr
-LD:  LD/LDal/LDah
-LDI: LDI imm4
-ST:  ST/STal/STah
-STI: STI imm4
-STK: 
-     SPUSH
-     SPOP
-     SPOP ADD
-     SPOP AND
-     SPOP OR
-     SPOP XOR
-LEA: LEAl/LEAh imm4
-BR:
-     BR{n,z,p} (i.e.  BR, BRn, BRz, BRnz, BRnzp, etc)
-PRT:
-     PRTin [0-7]
-     PRTout [0-7]
-ASET:
-     ASET [0-15]
