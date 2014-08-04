@@ -8,6 +8,7 @@ void resetMachine() { /* Clear the registers */
     flags = 0;
     mdr = 0;
     ir = 0;
+    ia = 0;
     mar = 0;
     pc = 0;
     amux = 0;
@@ -71,7 +72,17 @@ void x00() {
 void x01() {
     currentState = 0x01;
     pc++;
-    nextState = &x03;
+    /* experimental */
+    ir = mdr;
+    switch((ir & 0xF0) >> 4) {
+        case LDI:
+        case STI:
+        case LEA:
+            nextState = &x23;
+            break;
+        default:
+            nextState = &x03;
+    }
 }
 
 void x02() {
@@ -90,7 +101,9 @@ char f3;
 
 void x03() {
     currentState = 0x03;
-    ir = mdr;
+    /*ir = mdr;*/
+    /* experimental */
+    ia = mdr;
 
     imm4 = ir & 0x0F;
     imm3 = ir & 0x07;
@@ -100,53 +113,53 @@ void x03() {
     f3 = (ir & 0x02) != 0;
 
     switch((ir & 0xF0) >> 4) {
-    case ADD:
-        nextState = &x04;
-        break;
-    case AND:
-        nextState = &x06;
-        break;
-    case OR:
-        nextState = &x07;
-        break;
-    case XOR:
-        nextState = &x08;
-        break;
-    case NOT:
-        nextState = &x05;
-        break;
-    case SHF:
-        nextState = &x09;
-        break;
-    case LD:
-        nextState = &x0A;
-        break;
-    case LDI:
-        nextState = &x0D;
-        break;
-    case ST:
-        nextState = &x10;
-        break;
-    case STI:
-        nextState = &x12;
-        break;
-    case STK:
-        nextState = &x15;
-        break;
-    case LEA:
-        nextState = &x1C;
-        break;
-    case BR:
-        nextState = &x1F;
-        break;
-    case PRT:
-        nextState = &x20;
-        break;
-    case ASET:
-        nextState = &x22;
-        break;
-    default:
-        nextState = &exception;
+        case ADD:
+            nextState = &x04;
+            break;
+        case AND:
+            nextState = &x06;
+            break;
+        case OR:
+            nextState = &x07;
+            break;
+        case XOR:
+            nextState = &x08;
+            break;
+        case NOT:
+            nextState = &x05;
+            break;
+        case SHF:
+            nextState = &x09;
+            break;
+        case LD:
+            nextState = &x0A;
+            break;
+        case LDI:
+            nextState = &x0D;
+            break;
+        case ST:
+            nextState = &x10;
+            break;
+        case STI:
+            nextState = &x12;
+            break;
+        case STK:
+            nextState = &x15;
+            break;
+        case LEA:
+            nextState = &x1C;
+            break;
+        case BR:
+            nextState = &x1F;
+            break;
+        case PRT:
+            nextState = &x20;
+            break;
+        case ASET:
+            nextState = &x22;
+            break;
+        default:
+            nextState = &exception;
     }
 }
 
@@ -238,7 +251,9 @@ void x0D() {
 
 void x0E() {
     currentState = 0x0E;
-    mar += imm4;
+    /* experimental */
+    mar += ia;
+    /*mar += imm4;*/
     nextState = &x0F;
 }
 
@@ -272,7 +287,9 @@ void x12() {
 
 void x13() {
     currentState = 0x13;
-    mar += imm4;
+    /* experimental */
+    mar += ia;
+    /*mar += imm4;*/
     nextState = &x14;
 }
 
@@ -357,7 +374,9 @@ void x1C() {
 
 void x1D() {
     currentState = 0x1D;
-    mar += imm3;
+    /* experimental */
+    mar += ia;
+    /*mar += imm3;*/
     nextState = &x1E;
 }
 
@@ -398,6 +417,21 @@ void x22() {
     amux = imm4;
     setflags();
     nextState = &x00;
+}
+
+/* experimental */
+/* Fetch ia and increment pc*/
+void x23() {
+    currentState = 0x23;
+    mdr = memory[pc];
+
+    nextState = &x24;
+}
+
+void x24() {
+    currentState = 0x24;
+    pc++;
+    nextState = &x03;
 }
 
 void exception() {

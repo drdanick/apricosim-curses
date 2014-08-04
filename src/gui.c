@@ -100,9 +100,9 @@ void refreshRegisterDisplay() {
         printRegister(&registers, "CPU Flags         ", "\n", flags, 8, 0);
         printRegister(&registers, "MDR               ", "\n", mdr, 8, 0);
         printRegister(&registers, "IR                ", "\n", ir, 8, 0);
+        printRegister(&registers, "IA                ", "\n", ia, 8, 0);
         printRegister(&registers, "Stack Pointer     ", "\n", stackpt, 8, 0);
         printRegister(&registers, "MAR               ", "\n", mar, 16, 0);
-        waddstr(&registers, "\n");
         waddstr(&registers, "\n");
         waddstr(&registers, "\n");
         waddstr(&registers, "\n");

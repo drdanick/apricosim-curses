@@ -52,6 +52,10 @@ void x20();
 void x21();
 void x22();
 
+/* experimental */
+void x23();
+void x24();
+
 void exception();
 
 /* Misc. Constants */
@@ -90,7 +94,7 @@ int cycleCount, instructionCount;
 void (*nextState)();
 
 /* Registers */
-unsigned char  stackpt, flags, mdr, ir;
+unsigned char  stackpt, flags, mdr, ir, ia;
 unsigned char  accumulator[ACCUMULATOR_COUNT];
 unsigned short mar;  /* Memory Address Register */
 unsigned short pc;   /* Program Counter */

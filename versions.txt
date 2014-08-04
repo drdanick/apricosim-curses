@@ -3,6 +3,10 @@
 ===========================
 
 
+ Experimental changes
+----------------------
+ * Added support for 8 bit offset arguments
+
  V0.8
 ----------
  * Added support for variable shifts

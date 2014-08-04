@@ -14,6 +14,7 @@ $ip    16-bit instruction pointer
 $mr    16-bit memory address register
 $dr    8-bit memory data register
 $ir    8-bit instruction register
+$ia    8-bit optional instruction argument
 $sp    8-bit Stack register (Or stack pointer)
 $ar1-4 4 8-bit accumulators
 $fr    8-bit CPU status flags register
@@ -133,7 +134,8 @@ else
  LDI
 -----
 
-0111 ipoffset(4)
+0111 xxxx
+ipoffset(8)
 
 $ar = memory[$ip + ipoffset]
 
@@ -157,7 +159,8 @@ else
  STI
 -----
 
-1001 ipoffset(4)
+1001 xxxx
+ipoffset(8)
 
 memory[$ip + ipoffset] = $ar
 
@@ -194,7 +197,8 @@ else:
  LEA
 -----
 
-1011 getMSB(1) ipOffset(3)
+1011 getMSB(1) xxx
+ipoffset(8)
 
 if getMSB == 1:
     $ar = ($ip + ipOffset) >> 8
@@ -231,3 +235,13 @@ else
 
 Set the current active accumulator to accumulator #aID
 
+
+============
+ TODO/NOTES
+============
+
+It should be possible for offset based instructions 
+to conditionally load an extra byte dependant on whether 
+any of the last 4 bits of the instruction is non-zero. 
+This is subject to implementation complications, and 
+will be explored in the future.
