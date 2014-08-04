@@ -198,7 +198,7 @@ void x09() {
         accumulator[amux] <<= imm2;
     setflags();
 
-    if(--imm2)
+    if(imm2--)
         nextState = &x09;
     else
         nextState = &x00;
