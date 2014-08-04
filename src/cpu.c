@@ -193,9 +193,9 @@ void x08() {
 void x09() {
     currentState = 0x09;
     if(f1)
-        accumulator[amux] >>= imm2;
+        accumulator[amux] >>= 1;
     else
-        accumulator[amux] <<= imm2;
+        accumulator[amux] <<= 1;
     setflags();
 
     if(imm2--)
