@@ -102,12 +102,12 @@ $ar = !$ar
  SHF
 -----
 
-0101 direction(1) xxx
+0101 direction(1) x count(2)
 
 if direction == 1:
-    $ar >> 1
+    $ar >> count
 else
-    $ar << 1
+    $ar << count
 
 
 ----

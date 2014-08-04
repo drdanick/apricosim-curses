@@ -3,6 +3,10 @@
 ===========================
 
 
+ V0.8
+----------
+ * Added support for variable shifts
+
  V0.7.1
 ----------
  * Negative status flag is now set regardless of sign extend mode.

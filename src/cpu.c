@@ -185,14 +185,23 @@ void x08() {
     nextState = &x00;
 }
 
+/* NOTE: 
+ * This state does not reflect the hardware implementation of a shift 
+ * in Apricos, but it does reflect the approximate number of states that 
+ * will be required for a shift.
+ */
 void x09() {
     currentState = 0x09;
     if(f1)
-        accumulator[amux] >>= 1;
+        accumulator[amux] >>= imm2;
     else
-        accumulator[amux] <<= 1;
+        accumulator[amux] <<= imm2;
     setflags();
-    nextState = &x00;
+
+    if(--imm2)
+        nextState = &x09;
+    else
+        nextState = &x00;
 }
 
 void x0A() {
