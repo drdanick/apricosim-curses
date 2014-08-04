@@ -105,9 +105,13 @@ $ar = !$ar
 0101 direction(1) x count(2)
 
 if direction == 1:
-    $ar >> count
+    $ar >> count-1
 else
-    $ar << count
+    $ar << count-1
+
+Note that count is offset by 1.
+This means that 00 will correspond to 
+a shift of 1, 01 to a shift of 2, etc.
 
 
 ----
