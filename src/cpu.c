@@ -223,9 +223,9 @@ void x0B() {
 void x0C() {
     currentState = 0x0C;
     if(f2) {
-        mar |= ((short)accumulator[amux]) << 8;
+        mar = (mar & 0x00FF) | (((short)accumulator[amux]) << 8);
     } else {
-        mar |= ((short)accumulator[amux]) & 0xFF;
+        mar = (mar & 0xFF00) | (((short)accumulator[amux]) & 0xFF);
     }
     nextState = &x00;
 }
