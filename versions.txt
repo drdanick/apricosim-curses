@@ -3,6 +3,10 @@
 ===========================
 
 
+ V0.8.1
+----------
+ * Fixed issue with LDa/STa not manipulating $mar correctly
+
  V0.8
 ----------
  * Added support for variable shifts
