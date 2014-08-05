@@ -55,6 +55,7 @@ void x22();
 /* experimental */
 void x23();
 void x24();
+void x25();
 
 void exception();
 

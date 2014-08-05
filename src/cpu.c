@@ -220,7 +220,7 @@ void x09() {
 void x0A() {
     currentState = 0x0A;
     if(f1) /* In the hardware implementation, state 0A and 0C will be combined. */
-        nextState = &x0C;
+        nextState = &x25; /* TODO: Consider having LDa make $a = $mar*/
     else {
         mdr = memory[mar];
         nextState = &x0B;
@@ -236,9 +236,9 @@ void x0B() {
 void x0C() {
     currentState = 0x0C;
     if(f2) {
-        mar |= ((short)accumulator[amux]) << 8;
+        mar = (mar & 0x00FF) | (((short)accumulator[amux]) << 8);
     } else {
-        mar |= ((short)accumulator[amux]) & 0xFF;
+        mar = (mar & 0xFF00) | (((short)accumulator[amux]) & 0xFF);
     }
     nextState = &x00;
 }
@@ -433,6 +433,18 @@ void x24() {
     pc++;
     nextState = &x03;
 }
+
+/* Required for LDa */
+void x25() {
+    currentState = 0x25;
+    if(f2) {
+        accumulator[amux] = (mar >> 8) & 0xFF;
+    } else {
+        accumulator[amux] = (mar & 0xFF);
+    }
+    nextState = &x00;
+}
+/* End experimental */
 
 void exception() {
     currentState = 0xFF;

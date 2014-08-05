@@ -6,6 +6,7 @@
  Experimental changes
 ----------------------
  * Added support for 8 bit offset arguments
+ * LDa now grabs the value in $mar and places it in $ax
 
  V0.8
 ----------
