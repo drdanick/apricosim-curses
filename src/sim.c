@@ -2,16 +2,7 @@
 #include "gui.h"
 
 static void finish(int sig) {
-    delwin(&registers);
-    delwin(&registers_b);
-    delwin(&mainmem);
-    delwin(&mainmem_b);
-    delwin(&stack);
-    delwin(&stack_b);
-    delwin(&registers);
-    delwin(&registers_b);
-    endwin();
-
+    destroygui();
     exit(0);
 }
 
@@ -47,43 +38,45 @@ int main(int argc, char** argv) {
     initgui();
     resetMachine();
 
+    refreshMemoryDisplay();
+    refreshStackDisplay();
+    refreshRegisterDisplay();
+
     if(argc > 1)
         loadProgram(argv[1]);
 
     refresh();
 
-
-    int temp = 0;
     for(;;) {
         int c = getch();
         if(c == 'j' && memdisplay < 65535) {
             memdisplay++;
-            scroll(&mainmem);
+            scroll(mainmem);
             if(memdisplay < 65536 - (mh - 3))
-                printMemory(&mainmem, mh-3, 0, memdisplay + (mh - 3), memory[memdisplay + (mh - 3)], breakpoints[memdisplay + (mh - 3)], pc == (memdisplay + (mh - 3)));
+                printMemory(mainmem, mh-3, 0, memdisplay + (mh - 3), memory[memdisplay + (mh - 3)], breakpoints[memdisplay + (mh - 3)], pc == (memdisplay + (mh - 3)));
             else
-                mvwaddch(&mainmem, mh - 3, 0, '~');
-            wnoutrefresh(&mainmem);
+                mvwaddch(mainmem, mh - 3, 0, '~');
+            wnoutrefresh(mainmem);
         } else if(c == 'k' && memdisplay > 0) {
             memdisplay--;
-            wscrl(&mainmem, -1);
-            printMemory(&mainmem, 0, 0, memdisplay, memory[memdisplay], breakpoints[memdisplay], pc == memdisplay);
-            wnoutrefresh(&mainmem);
+            wscrl(mainmem, -1);
+            printMemory(mainmem, 0, 0, memdisplay, memory[memdisplay], breakpoints[memdisplay], pc == memdisplay);
+            wnoutrefresh(mainmem);
         } else if(c == 'J' && stackdisplay < 255) {
             stackdisplay++;
-            scroll(&stack);
+            scroll(stack);
             if(stackdisplay < 256 - (sh -3))
-                printMemory(&stack, sh-3, 0, stackdisplay + (sh - 3), stackmem[stackdisplay + (sh - 3)], 0, stackpt == (stackdisplay + (sh - 3)));
+                printMemory(stack, sh-3, 0, stackdisplay + (sh - 3), stackmem[stackdisplay + (sh - 3)], 0, stackpt == (stackdisplay + (sh - 3)));
             else
-                mvwaddch(&stack, sh - 3, 0, '~');
-            wnoutrefresh(&stack);
+                mvwaddch(stack, sh - 3, 0, '~');
+            wnoutrefresh(stack);
 
         } else if(c == 'K' && stackdisplay > 0) {
             stackdisplay--;
-            wscrl(&stack, -1);
-            printMemory(&stack, 0, 0, stackdisplay, stackmem[stackdisplay], 0, stackpt == stackdisplay);
+            wscrl(stack, -1);
+            printMemory(stack, 0, 0, stackdisplay, stackmem[stackdisplay], 0, stackpt == stackdisplay);
 
-            wnoutrefresh(&stack);
+            wnoutrefresh(stack);
         } else if(c == ' ') {
             do {
                 cycle();

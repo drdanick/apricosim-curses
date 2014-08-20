@@ -5,6 +5,7 @@
 
 /* Functions */
 void initgui();
+void destroygui();
 void initDimensions(int maxX, int maxY);
 void refreshRegisterDisplay();
 void printMemory(WINDOW* win, int y, int x, int address, int value, int is_breakpoint, int is_pointed_to); 
@@ -26,7 +27,13 @@ const static char HEX[16] = {
 
 /* Globals */
 
-WINDOW registers_b, registers, mainmem_b, mainmem, stack_b, stack;
+WINDOW *registers_b;
+WINDOW *registers;
+WINDOW *mainmem_b;
+WINDOW *mainmem;
+WINDOW *stack_b;
+WINDOW *stack;
+
 int rx, ry, rw, rh, mx, my, mw, mh, sx, sy, sw, sh; /* GUI dimensions and coordinates */
 
 unsigned int memdisplay; /* Memory display offset */

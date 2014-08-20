@@ -35,9 +35,6 @@ void resetMachine() { /* Clear the registers */
 
     stackmem = &memory[65536 - 256];
 
-    refreshMemoryDisplay();
-    refreshStackDisplay();
-    refreshRegisterDisplay();
 }
 
 void cycle() {
@@ -300,7 +297,7 @@ void x16() {
 
 void x17() {
     currentState = 0x17;
-    stackpt = ++stackpt & 0x00FF;
+    stackpt = (stackpt + 1) & 0x00FF;
     nextState = &x18;
 }
 
