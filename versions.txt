@@ -8,6 +8,14 @@
  * Added support for 8 bit offset arguments
  * LDa now grabs the value in $mar and places it in $ax
 
+ V0.8.2
+----------
+ * GUI code cleanup to fix bugs with some ncurses builds
+
+ V0.8.1
+----------
+ * Fixed issue with LDa/STa not manipulating $mar correctly
+
  V0.8
 ----------
  * Added support for variable shifts
