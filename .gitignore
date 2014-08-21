@@ -20,6 +20,7 @@ autom4te.cache/
 config.log
 config.status
 configure
+compile
 depcomp
 install-sh
 missing
