@@ -73,7 +73,8 @@ void x01() {
     switch((ir & 0xF0) >> 4) {
         case LDI:
         case STI:
-        case LEA:
+        case LA:
+        case BR:
             nextState = &x23;
             break;
         default:
@@ -94,12 +95,13 @@ char imm2;
 char f1;
 char f2;
 char f3;
+char f4;
 
 void x03() {
     currentState = 0x03;
     /*ir = mdr;*/
     /* experimental */
-    ia = mdr;
+    ia = (ir >> 8) & 0x0FF;
 
     imm4 = ir & 0x0F;
     imm3 = ir & 0x07;
@@ -107,8 +109,9 @@ void x03() {
     f1 = (ir & 0x08) != 0;
     f2 = (ir & 0x04) != 0;
     f3 = (ir & 0x02) != 0;
+    f4 = (ir & 0x01) != 0;
 
-    switch((ir & 0xF0) >> 4) {
+    switch((ir & 0x0F0) >> 4) {
         case ADD:
             nextState = &x04;
             break;
@@ -142,8 +145,8 @@ void x03() {
         case STK:
             nextState = &x15;
             break;
-        case LEA:
-            nextState = &x1C;
+        case LA:
+            nextState = &x26;
             break;
         case BR:
             nextState = &x1F;
@@ -226,6 +229,7 @@ void x0A() {
 void x0B() {
     currentState = 0x0B;
     accumulator[amux] = mdr;
+    setflags();
     nextState = &x00;
 }
 
@@ -388,8 +392,13 @@ void x1E() {
 
 void x1F() {
     currentState = 0x1F;
-    if((f1 && flags & NEG_FLAG) || (f2 && flags & ZER_FLAG) || (f3 && flags & POS_FLAG))
-        pc = mar;
+    if((f1 && flags & NEG_FLAG) || (f2 && flags & ZER_FLAG) || (f3 && flags & POS_FLAG)) {
+        if(!f4)
+            pc = mar;
+        else
+            pc = (pc & 0xFF00) | ia;
+
+    }
 
     nextState = &x00;
 }
@@ -426,6 +435,7 @@ void x23() {
 
 void x24() {
     currentState = 0x24;
+    ir |= (mdr << 8);
     pc++;
     nextState = &x03;
 }
@@ -440,10 +450,21 @@ void x25() {
     }
     nextState = &x00;
 }
+
+void x26() {
+    currentState = 0x26;
+    if(!f1) {
+        mar = (mar & 0xFF00) | ia;
+    } else {
+        mar = (mar & 0x00FF) | (ia << 8);
+    }
+    nextState = &x00;
+}
 /* End experimental */
 
 void exception() {
     currentState = 0xFF;
     /* Some sort of exception */
-    halted = 1;
+    /*halted = 1;*/
+    nextState = &x00;
 }

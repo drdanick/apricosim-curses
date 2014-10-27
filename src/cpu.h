@@ -56,6 +56,7 @@ void x22();
 void x23();
 void x24();
 void x25();
+void x26(); /* New LA */
 
 void exception();
 
@@ -74,7 +75,7 @@ void exception();
 #define ST    8
 #define STI   9
 #define STK   10
-#define LEA   11
+#define LA    11
 #define BR    12
 #define PRT   13
 #define ASET  14
@@ -95,8 +96,9 @@ int cycleCount, instructionCount;
 void (*nextState)();
 
 /* Registers */
-unsigned char  stackpt, flags, mdr, ir, ia;
+unsigned char  stackpt, flags, mdr, ia;
 unsigned char  accumulator[ACCUMULATOR_COUNT];
+unsigned short ir;   /* Instruction Register */
 unsigned short mar;  /* Memory Address Register */
 unsigned short pc;   /* Program Counter */
 unsigned char  amux; /* Accumulator MUX pointer */

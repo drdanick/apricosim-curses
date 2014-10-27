@@ -12,6 +12,7 @@ a.out
 
 # Apricosim
 aprsim
+aprsim.exe
 
 # Make/Automake/Autoconf/Configure
 .deps/

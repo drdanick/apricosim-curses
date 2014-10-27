@@ -7,6 +7,8 @@
 ----------------------
  * Added support for 8 bit offset arguments
  * LDa now grabs the value in $mar and places it in $ax
+ * BR can now jump using either the value in $mar, or by using an 8-bit block local address
+ * LEA replaced with LA.
 
  V0.8.2
 ----------
