@@ -1,10 +1,28 @@
 #include "gui.h"
 #include "cpu.h"
+#include "signal.h"
+
+void handle_winch(int sig) {
+    destroygui();
+    refresh(); /* This forces ncurses to pick up the new term size */
+    clear();
+
+    initgui();
+    refreshRegisterDisplay(); 
+    refreshMemoryDisplay();
+    refreshStackDisplay();
+    refresh();
+}
 
 void initgui() {
     int maxX, maxY;
-    rdisplaymode = 1;
-    initscr();
+
+    if(winchHandler != &handle_winch) {
+        winchHandler = &handle_winch;
+        signal(SIGWINCH, handle_winch);
+        initscr();
+        rdisplaymode = 1;
+    }
     nonl();
     cbreak();
     noecho();
@@ -116,9 +134,9 @@ void refreshRegisterDisplay() {
     } else {
         printRegister(registers, "CPU Flags         ", "\n", flags, 8, 0);
         printRegister(registers, "MDR               ", "\n", mdr, 8, 0);
-        printRegister(registers, "IR                ", "\n", ir, 8, 0);
         printRegister(registers, "IA                ", "\n", ia, 8, 0);
         printRegister(registers, "Stack Pointer     ", "\n", stackpt, 8, 0);
+        printRegister(registers, "IR                ", "\n", ir, 16, 0);
         printRegister(registers, "MAR               ", "\n", mar, 16, 0);
         waddstr(registers, "\n");
         waddstr(registers, "\n");

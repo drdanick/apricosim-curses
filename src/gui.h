@@ -27,6 +27,7 @@ const static char HEX[16] = {
 
 /* Globals */
 
+void (*winchHandler)();
 WINDOW *registers_b;
 WINDOW *registers;
 WINDOW *mainmem_b;
