@@ -5,6 +5,7 @@
 void handle_winch(int sig) {
     destroygui();
     refresh(); /* This forces ncurses to pick up the new term size */
+    
     clear();
 
     initgui();
@@ -12,15 +13,17 @@ void handle_winch(int sig) {
     refreshMemoryDisplay();
     refreshStackDisplay();
     refresh();
+    
+    signal(SIGWINCH, handle_winch); /* Required under c89 */
 }
 
 void initgui() {
     int maxX, maxY;
 
     if(winchHandler != &handle_winch) {
+        initscr();
         winchHandler = &handle_winch;
         signal(SIGWINCH, handle_winch);
-        initscr();
         rdisplaymode = 1;
     }
     nonl();
@@ -66,7 +69,6 @@ void initgui() {
     wrefresh(registers);
     wrefresh(mainmem);
     wrefresh(stack);
-
 }
 
 void destroygui() {
