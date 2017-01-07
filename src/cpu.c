@@ -1,6 +1,10 @@
 #include "cpu.h"
 #include "gui.h"
 
+#ifdef PORT_EMU
+#include "ports.h"
+#endif
+
 
 void resetMachine() { /* Clear the registers */
     int i;
@@ -405,7 +409,12 @@ void x1F() {
 
 void x20() {
     currentState = 0x20;
-    /* NO CONNECTED PERIPHERALS */
+#ifdef PORT_EMU
+    portIO(imm3, f1);
+
+    if(!f1)
+        setflags();
+#endif
     nextState = &x00;
 }
 

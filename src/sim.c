@@ -1,5 +1,10 @@
 #include "cpu.h"
 #include "gui.h"
+#ifdef PORT_EMU
+#include "ports.h"
+#endif
+
+#include <unistd.h>
 
 static void finish(int sig) {
     destroygui();
@@ -35,25 +40,39 @@ void loadProgram(char* filename) {
 }
 
 int main(int argc, char** argv) {
+    int temp = 0;
+    char docycle = 0;
+    char running = 0; /* Needed so we can do a full GUI refresh if we break out of a run */
+    int c;
+
     signal(SIGINT, finish);
-    cyclemode = 1;
+    cyclemode = 0;
 
     initgui();
     resetMachine();
 
-    refreshMemoryDisplay();
-    refreshStackDisplay();
-    refreshRegisterDisplay();
+#ifdef PORT_EMU
+    initPorts();
+#endif
+
+    refreshAll();
 
     for(; argc > 1; argc--)
         loadProgram(argv[argc-1]);
 
     refresh();
 
-    int temp = 0;
     for(;;) {
-        int c = getch();
-        if(c == 'j' && memdisplay < 65535) {
+        if(c = getch(), c == ERR && !docycle) {
+            /* Prevent this busy wait from consuming too much CPU time */
+            usleep(10);
+            continue;
+        }
+
+        /* This should be a switch-case block. if-elseif blocks probably won't generate optimal assembly */
+        if(c == ' ') {
+            docycle = !docycle;
+        }else if(c == 'j' && memdisplay < 65535) {
             memdisplay++;
             scroll(mainmem);
             if(memdisplay < 65536 - (mh - 3))
@@ -81,26 +100,54 @@ int main(int argc, char** argv) {
             printMemory(stack, 0, 0, stackdisplay, stackmem[stackdisplay], 0, stackpt == stackdisplay);
 
             wnoutrefresh(stack);
-        } else if(c == ' ') {
-            do {
-                cycle();
-                refreshMemoryDisplay();
-                refreshStackDisplay();
-                refreshRegisterDisplay();
-            } while (!cyclemode && nextState != &x00);
-
+        } else if(c == KEY_NPAGE) { /* page down */
+            memdisplay += 0x0100;
+            if(memdisplay > 0xFFFF)
+                memdisplay = 0xFFFF;
+            refreshMemoryDisplay();
+        } else if(c == KEY_PPAGE) { /* page up */
+            if(memdisplay > 0x0100)
+                memdisplay -= 0x0100;
+            else
+                memdisplay = 0;
+            refreshMemoryDisplay();
         } else if(c == 'b') {
             breakpoints[memdisplay] = (breakpoints[memdisplay] + 1) & 0x01;
             refreshMemoryDisplay();
         } else if(c == 'm') {
-            cyclemode ^= 0x01;
-            refreshMemoryDisplay();
+            cyclemode = (cyclemode + 1) % 3;
+            refreshStatusDisplay();
         } else if(c == 'r'){
             rdisplaymode = !rdisplaymode;
             refreshRegisterDisplay();
         }else if(c == 'q' || c == 'Q') {
             break;
         }
+
+        /* Perform a cycle if required */
+        if(docycle) {
+            do {
+                cycle();
+            } while(cyclemode && nextState != &x00);
+
+            if(cyclemode != 2) {
+                refreshMemoryDisplay();
+                refreshStackDisplay();
+                refreshRegisterDisplay();
+            }
+            refreshStatusDisplay();
+
+            if(cyclemode != 2 || breakpoints[pc])
+                docycle = 0;
+            else
+                running = 1;
+        }
+
+        if(!docycle && running) {
+            running = 0;
+            refreshAll();
+        }
+
         refresh();
     }
 

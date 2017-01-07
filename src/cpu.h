@@ -62,6 +62,8 @@ void exception();
 
 /* Misc. Constants */
 #define ACCUMULATOR_COUNT 16
+#define DISK_PAGE_SECTOR  254
+#define BLOCK_SIZE        256
 
 /* OP Codes */
 #define ADD   0
