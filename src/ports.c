@@ -11,17 +11,23 @@
 #include <termios.h>
 #include <fcntl.h>
 
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 char diskFileName[] = "x.dsk";
 int inbuff = -1;
 
 #ifdef TTY_EMU
 int ttyHandle = 0;
+int fd;
 #endif
 
 void initPorts() {
 #ifdef TTY_EMU
     /*Set up tty*/
-    struct termios options;
+    fd = open("/tmp/apricosfifo", O_WRONLY); /* hardcoded for now */
+    /*struct termios options;
 
     ttyHandle = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY);
     if(ttyHandle != -1) {
@@ -31,15 +37,15 @@ void initPorts() {
         cfsetospeed(&options, B9600);
 
         cfmakeraw(&options);
-        options.c_cflag |= (CLOCAL | CREAD);   /* Enable the receiver and set local mode */
-        options.c_cflag &= ~CSTOPB;            /* 1 stop bit */
+        options.c_cflag |= (CLOCAL | CREAD);   /* Enable the receiver and set local mode /
+        options.c_cflag &= ~CSTOPB;            /* 1 stop bit /
         options.c_cc[VMIN]  = 1;
         options.c_cc[VTIME] = 2;
 
         tcsetattr(ttyHandle, TCSANOW, &options);
     } else {
         ttyHandle = 0;
-    }
+    }*/
 #endif /*TTY_EMU*/
 }
 
@@ -138,8 +144,9 @@ void portIO(unsigned int portId, unsigned int writeMode) {
                 break;
             case 7:    /* TTY Write */
 #ifdef TTY_EMU
-                write(ttyHandle, &accumulator[amux], 1);
-                ioctl(ttyHandle, TCIOFLUSH);
+                write(fd, &accumulator[amux], 1);
+                /*write(ttyHandle, &accumulator[amux], 1);*/
+                /*ioctl(ttyHandle, TCIOFLUSH);*/
 #endif
                 break;
             default:   /* NOP */
