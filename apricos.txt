@@ -43,7 +43,7 @@ OP Code	|  Instruction	|  Description
 0110	|  LD		|  Load a value from memory into the accumulator
 0111	|  LDI		|  Load a value from memory using an immediate PC offset
 1000	|  ST		|  Store the accumulator to memory
-1001	|  STI		|  Store the accumulator to memory using an immesiate PC offset
+1001	|  STI		|  Store the accumulator to memory using an immediate PC offset
 1010	|  STK		|  Stack push/pop
 1011	|  LA		|  Store an immediate address into the MAR
 1100	|  BR		|  Branch
