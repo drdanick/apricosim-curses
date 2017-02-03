@@ -45,7 +45,7 @@ OP Code	|  Instruction	|  Description
 1000	|  ST		|  Store the accumulator to memory
 1001	|  STI		|  Store the accumulator to memory using an immesiate PC offset
 1010	|  STK		|  Stack push/pop
-1011	|  LA		|  Store an immediate address into the MAR
+1011	|  LA		|  Store an immediate address into the MAR or the accumulator
 1100	|  BR		|  Branch
 1101	|  PRT		|  Port I/O
 1110	|  ASET  	|  Set the current active accumulator
@@ -197,13 +197,19 @@ else:
  LA
 -----
 
-1011 loadHigh(1) xxx
+1011 loadHigh(1) destination(1) xx
 address(8)
 
 if loadHigh == 0:
-    $mar[0-7] = address
+    if destination == 0:
+        $mr[0-7] = address
+    else:
+        $ar = address
 else:
-    $mar[8-15] = address
+    if destination == 0:
+        $mr[8-15] = address
+    else:
+        $ar = address
 
 ----
  BR

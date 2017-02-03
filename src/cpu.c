@@ -463,9 +463,15 @@ void x25() {
 void x26() {
     currentState = 0x26;
     if(!f1) {
-        mar = (mar & 0xFF00) | ia;
+        if(!f2)
+            mar = (mar & 0xFF00) | ia;
+        else
+            accumulator[amux] = ia;
     } else {
-        mar = (mar & 0x00FF) | (ia << 8);
+        if(!f2)
+            mar = (mar & 0x00FF) | (ia << 8);
+        else
+            accumulator[amux] = ia;
     }
     nextState = &x00;
 }
