@@ -1,3 +1,4 @@
+#include "argparser.h"
 #include "cpu.h"
 #include "gui.h"
 #ifdef PORT_EMU
@@ -44,6 +45,9 @@ int main(int argc, char** argv) {
     char docycle = 0;
     char running = 0; /* Needed so we can do a full GUI refresh if we break out of a run */
     int c;
+    Settings settings;
+
+    settings = getSettingsFromArgs(argc, argv);
 
     signal(SIGINT, finish);
     cyclemode = 0;

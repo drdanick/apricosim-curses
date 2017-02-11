@@ -4,4 +4,4 @@ AM_CFLAGS = -std=c89 -O2
 
 # Binaries
 bin_PROGRAMS = aprsim
-aprsim_SOURCES = cpu.c gui.c sim.c ports.c diskio.c
+aprsim_SOURCES = cpu.c gui.c sim.c ports.c diskio.c argparser.c
