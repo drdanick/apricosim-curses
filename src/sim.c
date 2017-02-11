@@ -7,8 +7,11 @@
 
 #include <unistd.h>
 
+Settings settings;
+
 static void finish(int sig) {
     destroygui();
+    freeSettings(settings);
     exit(0);
 }
 
@@ -44,8 +47,7 @@ int main(int argc, char** argv) {
     int temp = 0;
     char docycle = 0;
     char running = 0; /* Needed so we can do a full GUI refresh if we break out of a run */
-    int c;
-    Settings settings;
+    int c, i;
 
     settings = getSettingsFromArgs(argc, argv);
 
@@ -61,8 +63,8 @@ int main(int argc, char** argv) {
 
     refreshAll();
 
-    for(; argc > 1; argc--)
-        loadProgram(argv[argc-1]);
+    for(i = 0; i < settings.binFileCount; i++)
+        loadProgram(settings.binFiles[i]);
 
     refresh();
 
