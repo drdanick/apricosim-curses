@@ -94,7 +94,7 @@ void initDimensions(int maxX, int maxY) {
     
     mx = 0;
     my = rh;
-    mw = maxX / 2;
+    mw = (int)(maxX / 1.618f);
     mh = maxY - my;
 
     sx = mw + 1;
