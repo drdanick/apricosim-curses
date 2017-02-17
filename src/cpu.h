@@ -110,4 +110,7 @@ unsigned char memory[65536];
 unsigned char breakpoints[65536];
 unsigned char* stackmem;
 
+/* Debug stuff */
+char* symbols[65536];
+
 #endif /*CPU_H*/

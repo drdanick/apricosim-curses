@@ -155,7 +155,7 @@ void refreshRegisterDisplay() {
 
 }
 
-void printMemory(WINDOW* win, int y, int x, int address, int value, int is_breakpoint, int is_pointed_to) {
+void printMemory(WINDOW* win, int y, int x, int address, int value, int is_breakpoint, int is_pointed_to, char* symbol) {
     wmove(win, y, x);
 
     waddstr(win, is_pointed_to ? ">" : " ");
@@ -167,6 +167,11 @@ void printMemory(WINDOW* win, int y, int x, int address, int value, int is_break
     wprintw(win, "\t");
 
     printBinaryString(win, value, 8);
+
+    if(symbol) {
+        wprintw(win, "\t");
+        waddstr(win, symbol);
+    }
 }
 
 void refreshStatusDisplay() {
@@ -182,7 +187,15 @@ void refreshMemoryDisplay() {
 
     for(; i < mh - 2; i++) {
         if(i + memdisplay < 65536) {
-            printMemory(mainmem, i, 0, i + memdisplay, memory[memdisplay + i], breakpoints[memdisplay + i], pc == (memdisplay + i));
+            printMemory(
+                    mainmem,
+                    i,
+                    0,
+                    i + memdisplay,
+                    memory[memdisplay + i],
+                    breakpoints[memdisplay + i],
+                    pc == (memdisplay + i),
+                    symbols[memdisplay + i]);
         } else {
             wmove(mainmem, i, 0);
             waddch(mainmem, '~');
@@ -200,7 +213,15 @@ void refreshStackDisplay() {
 
     for(; i < sh - 2; i++) {
         if(i + stackdisplay < 256) {
-            printMemory(stack, i, 0, i + stackdisplay, stackmem[stackdisplay + i], 0, stackpt == (stackdisplay + i));
+            printMemory(
+                    stack,
+                    i,
+                    0,
+                    i + stackdisplay,
+                    stackmem[stackdisplay + i],
+                    0,
+                    stackpt == (stackdisplay + i),
+                    NULL);
         } else {
             wmove(stack, i, 0);
             waddch(stack, '~');

@@ -39,6 +39,9 @@ void resetMachine() { /* Clear the registers */
     memset(breakpoints, 0, 65536);
 
     stackmem = &memory[65536 - 256];
+
+    /* Clear the symbols table */
+    memset(symbols, 0, 65536);
 }
 
 void cycle() {

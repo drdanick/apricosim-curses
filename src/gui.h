@@ -8,7 +8,7 @@ void initgui();
 void destroygui();
 void initDimensions(int maxX, int maxY);
 void refreshRegisterDisplay();
-void printMemory(WINDOW* win, int y, int x, int address, int value, int is_breakpoint, int is_pointed_to); 
+void printMemory(WINDOW* win, int y, int x, int address, int value, int is_breakpoint, int is_pointed_to, char* symbol); 
 void refreshStatusDisplay();
 void refreshMemoryDisplay();
 void refreshStackDisplay();

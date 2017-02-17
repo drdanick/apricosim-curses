@@ -9,12 +9,6 @@
 
 Settings settings;
 
-static void finish(int sig) {
-    destroygui();
-    freeSettings(settings);
-    exit(0);
-}
-
 void loadProgram(char* filename) {
     FILE* f = fopen(filename, "rb");
     if(f != NULL) {
@@ -43,6 +37,47 @@ void loadProgram(char* filename) {
     }
 }
 
+void loadSymbolsFile(char* filename) {
+    FILE* f = fopen(filename, "r");
+
+    if(f == NULL)
+        return;
+
+    char lineBuff[512];
+    char symbolNameBuff[256];
+    int symbolLocation;
+ 
+    while(fgets(lineBuff, sizeof(lineBuff), f)) {
+        sscanf(lineBuff, "%d:%[^\n]", &symbolLocation, symbolNameBuff);
+
+        int symbolNameLen = strlen(symbolNameBuff);
+        char* symbolName = (char*)malloc(sizeof(char) * (symbolNameLen + 1));
+        memcpy(symbolName, symbolNameBuff, symbolNameLen + 1);
+
+        if(symbols[symbolLocation])
+            free(symbols[symbolLocation]);
+
+        symbols[symbolLocation] = symbolName;
+    }
+
+    fclose(f);
+}
+
+void freeSymbolTable() {
+    int i;
+    for(i = 0; i < 65536; i++) {
+        if(symbols[i])
+            free(symbols[i]);
+    }
+}
+
+static void finish(int sig) {
+    destroygui();
+    freeSettings(settings);
+    freeSymbolTable();
+    exit(0);
+}
+
 int main(int argc, char** argv) {
     int temp = 0;
     char docycle = 0;
@@ -54,18 +89,21 @@ int main(int argc, char** argv) {
     signal(SIGINT, finish);
     cyclemode = 0;
 
-    initgui();
     resetMachine();
 
 #ifdef PORT_EMU
     initPorts();
 #endif
 
-    refreshAll();
-
     for(i = 0; i < settings.binFileCount; i++)
         loadProgram(settings.binFiles[i]);
 
+    if(settings.symbolsFile != NULL) {
+        loadSymbolsFile(settings.symbolsFile);
+    }
+
+    initgui();
+    refreshAll();
     refresh();
 
     for(;;) {
@@ -82,20 +120,20 @@ int main(int argc, char** argv) {
             memdisplay++;
             scroll(mainmem);
             if(memdisplay < 65536 - (mh - 3))
-                printMemory(mainmem, mh-3, 0, memdisplay + (mh - 3), memory[memdisplay + (mh - 3)], breakpoints[memdisplay + (mh - 3)], pc == (memdisplay + (mh - 3)));
+                printMemory(mainmem, mh-3, 0, memdisplay + (mh - 3), memory[memdisplay + (mh - 3)], breakpoints[memdisplay + (mh - 3)], pc == (memdisplay + (mh - 3)), symbols[memdisplay + (mh - 3)]);
             else
                 mvwaddch(mainmem, mh - 3, 0, '~');
             wnoutrefresh(mainmem);
         } else if(c == 'k' && memdisplay > 0) {
             memdisplay--;
             wscrl(mainmem, -1);
-            printMemory(mainmem, 0, 0, memdisplay, memory[memdisplay], breakpoints[memdisplay], pc == memdisplay);
+            printMemory(mainmem, 0, 0, memdisplay, memory[memdisplay], breakpoints[memdisplay], pc == memdisplay, symbols[memdisplay]);
             wnoutrefresh(mainmem);
         } else if(c == 'J' && stackdisplay < 255) {
             stackdisplay++;
             scroll(stack);
             if(stackdisplay < 256 - (sh -3))
-                printMemory(stack, sh-3, 0, stackdisplay + (sh - 3), stackmem[stackdisplay + (sh - 3)], 0, stackpt == (stackdisplay + (sh - 3)));
+                printMemory(stack, sh-3, 0, stackdisplay + (sh - 3), stackmem[stackdisplay + (sh - 3)], 0, stackpt == (stackdisplay + (sh - 3)), NULL);
             else
                 mvwaddch(stack, sh - 3, 0, '~');
             wnoutrefresh(stack);
@@ -103,7 +141,7 @@ int main(int argc, char** argv) {
         } else if(c == 'K' && stackdisplay > 0) {
             stackdisplay--;
             wscrl(stack, -1);
-            printMemory(stack, 0, 0, stackdisplay, stackmem[stackdisplay], 0, stackpt == stackdisplay);
+            printMemory(stack, 0, 0, stackdisplay, stackmem[stackdisplay], 0, stackpt == stackdisplay, NULL);
 
             wnoutrefresh(stack);
         } else if(c == KEY_NPAGE) { /* page down */
