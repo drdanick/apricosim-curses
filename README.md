@@ -57,15 +57,15 @@ Using the simulator
 -------------------
 
 The simulator can be operated with the following controls:  
-`j/k`        Scroll the memory display down/up.  
-`J/K`        Scroll the stack display down/up.  
-`PGdown/PGup Scroll the memory display 256 lines down/up.  
-`r`          Toggle between register and CPU status display modes.  
-`b`          Toggle a breakpoint.  
-`m`          Toggle between state execution and instruction execution modes.  
-`space`      Execute one CPU state or instruction.  
-`q`          Quit the simulator.  
-`F1`         Interrupt the currently running program and quit the simulator.
+`j/k`         Scroll the memory display down/up.  
+`J/K`         Scroll the stack display down/up.  
+`PGdown/PGup` Scroll the memory display 256 lines down/up.  
+`r`           Toggle between register and CPU status display modes.  
+`b`           Toggle a breakpoint.  
+`m`           Toggle between state execution and instruction execution modes.  
+`space`       Execute one CPU state or instruction.  
+`q`           Quit the simulator.  
+`F1`          Interrupt the currently running program and quit the simulator.
 
 
 Licence
