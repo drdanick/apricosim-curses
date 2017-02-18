@@ -8,9 +8,11 @@ void initgui();
 void destroygui();
 void initDimensions(int maxX, int maxY);
 void refreshRegisterDisplay();
-void printMemory(WINDOW* win, int y, int x, int address, int value, int is_breakpoint, int is_pointed_to); 
+void printMemory(WINDOW* win, int y, int x, int address, int value, int is_breakpoint, int is_pointed_to, char* symbol); 
+void refreshStatusDisplay();
 void refreshMemoryDisplay();
 void refreshStackDisplay();
+void refreshAll();
 void printRegister(WINDOW* win, char* name, char* suffix, int value, int size, char mark);
 void printBinaryString(WINDOW* win, unsigned int num, unsigned int size);
 void printHexString(WINDOW* win, unsigned int num, unsigned int size);
@@ -27,6 +29,7 @@ const static char HEX[16] = {
 
 /* Globals */
 
+void (*winchHandler)();
 WINDOW *registers_b;
 WINDOW *registers;
 WINDOW *mainmem_b;

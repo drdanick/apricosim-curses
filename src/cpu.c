@@ -1,6 +1,10 @@
 #include "cpu.h"
 #include "gui.h"
 
+#ifdef PORT_EMU
+#include "ports.h"
+#endif
+
 
 void resetMachine() { /* Clear the registers */
     int i;
@@ -8,6 +12,7 @@ void resetMachine() { /* Clear the registers */
     flags = 0;
     mdr = 0;
     ir = 0;
+    ia = 0;
     mar = 0;
     pc = 0;
     amux = 0;
@@ -35,6 +40,8 @@ void resetMachine() { /* Clear the registers */
 
     stackmem = &memory[65536 - 256];
 
+    /* Clear the symbols table */
+    memset(symbols, 0, 65536);
 }
 
 void cycle() {
@@ -61,20 +68,28 @@ void setflags() {
 void x00() {
     currentState = 0x00;
     mdr = memory[pc];
-    /*mar = pc;*/
     nextState = &x01;
 }
 
 void x01() {
     currentState = 0x01;
     pc++;
-    nextState = &x03;
+    ir = mdr;
+    switch((ir & 0xF0) >> 4) {
+        case LDI:
+        case STI:
+        case LA:
+        case BR:
+            nextState = &x23;
+            break;
+        default:
+            nextState = &x03;
+    }
 }
 
 void x02() {
     /* This state is no longer used */
     currentState = 0x02;
-    /*mdr = memory[mar];*/
     nextState = &x03;
 }
 
@@ -84,10 +99,11 @@ char imm2;
 char f1;
 char f2;
 char f3;
+char f4;
 
 void x03() {
     currentState = 0x03;
-    ir = mdr;
+    ia = (ir >> 8) & 0x0FF;
 
     imm4 = ir & 0x0F;
     imm3 = ir & 0x07;
@@ -95,55 +111,56 @@ void x03() {
     f1 = (ir & 0x08) != 0;
     f2 = (ir & 0x04) != 0;
     f3 = (ir & 0x02) != 0;
+    f4 = (ir & 0x01) != 0;
 
-    switch((ir & 0xF0) >> 4) {
-    case ADD:
-        nextState = &x04;
-        break;
-    case AND:
-        nextState = &x06;
-        break;
-    case OR:
-        nextState = &x07;
-        break;
-    case XOR:
-        nextState = &x08;
-        break;
-    case NOT:
-        nextState = &x05;
-        break;
-    case SHF:
-        nextState = &x09;
-        break;
-    case LD:
-        nextState = &x0A;
-        break;
-    case LDI:
-        nextState = &x0D;
-        break;
-    case ST:
-        nextState = &x10;
-        break;
-    case STI:
-        nextState = &x12;
-        break;
-    case STK:
-        nextState = &x15;
-        break;
-    case LEA:
-        nextState = &x1C;
-        break;
-    case BR:
-        nextState = &x1F;
-        break;
-    case PRT:
-        nextState = &x20;
-        break;
-    case ASET:
-        nextState = &x22;
-        break;
-    default:
-        nextState = &exception;
+    switch((ir & 0x0F0) >> 4) {
+        case ADD:
+            nextState = &x04;
+            break;
+        case AND:
+            nextState = &x06;
+            break;
+        case OR:
+            nextState = &x07;
+            break;
+        case XOR:
+            nextState = &x08;
+            break;
+        case NOT:
+            nextState = &x05;
+            break;
+        case SHF:
+            nextState = &x09;
+            break;
+        case LD:
+            nextState = &x0A;
+            break;
+        case LDI:
+            nextState = &x0D;
+            break;
+        case ST:
+            nextState = &x10;
+            break;
+        case STI:
+            nextState = &x12;
+            break;
+        case STK:
+            nextState = &x15;
+            break;
+        case LA:
+            nextState = &x26;
+            break;
+        case BR:
+            nextState = &x1F;
+            break;
+        case PRT:
+            nextState = &x20;
+            break;
+        case ASET:
+            nextState = &x22;
+            break;
+        default:
+            nextState = &exception;
     }
 }
 
@@ -204,7 +221,7 @@ void x09() {
 void x0A() {
     currentState = 0x0A;
     if(f1) /* In the hardware implementation, state 0A and 0C will be combined. */
-        nextState = &x0C;
+        nextState = &x25; /* TODO: Consider having LDa make $a = $mar*/
     else {
         mdr = memory[mar];
         nextState = &x0B;
@@ -214,6 +231,7 @@ void x0A() {
 void x0B() {
     currentState = 0x0B;
     accumulator[amux] = mdr;
+    setflags();
     nextState = &x00;
 }
 
@@ -235,7 +253,7 @@ void x0D() {
 
 void x0E() {
     currentState = 0x0E;
-    mar += imm4;
+    mar += ia;
     nextState = &x0F;
 }
 
@@ -269,7 +287,7 @@ void x12() {
 
 void x13() {
     currentState = 0x13;
-    mar += imm4;
+    mar += ia;
     nextState = &x14;
 }
 
@@ -304,7 +322,6 @@ void x17() {
 void x18() {
     currentState = 0x18;
     mdr = accumulator[amux];
-    /*nextState = &x11;*/
     nextState = &x16;
 }
 
@@ -354,7 +371,7 @@ void x1C() {
 
 void x1D() {
     currentState = 0x1D;
-    mar += imm3;
+    mar += ia;
     nextState = &x1E;
 }
 
@@ -370,15 +387,25 @@ void x1E() {
 
 void x1F() {
     currentState = 0x1F;
-    if((f1 && flags & NEG_FLAG) || (f2 && flags & ZER_FLAG) || (f3 && flags & POS_FLAG))
-        pc = mar;
+    if((f1 && flags & NEG_FLAG) || (f2 && flags & ZER_FLAG) || (f3 && flags & POS_FLAG)) {
+        if(!f4)
+            pc = mar;
+        else
+            pc = (pc & 0xFF00) | ia;
+
+    }
 
     nextState = &x00;
 }
 
 void x20() {
     currentState = 0x20;
-    /* NO CONNECTED PERIPHERALS */
+#ifdef PORT_EMU
+    portIO(imm3, f1);
+
+    if(!f1)
+        setflags();
+#endif
     nextState = &x00;
 }
 
@@ -386,7 +413,6 @@ void x20() {
 void x21() {
     currentState = 0x21;
     /* move current accumulator into accumulator buffer */
-    /*swapaccum[2] = accumulator;*/
     nextState = &x22;
 }
 
@@ -397,8 +423,51 @@ void x22() {
     nextState = &x00;
 }
 
+/* Fetch ia and increment pc*/
+void x23() {
+    currentState = 0x23;
+    mdr = memory[pc];
+
+    nextState = &x24;
+}
+
+void x24() {
+    currentState = 0x24;
+    ir |= (mdr << 8);
+    pc++;
+    nextState = &x03;
+}
+
+/* Required for LDa */
+void x25() {
+    currentState = 0x25;
+    if(f2) {
+        accumulator[amux] = (mar >> 8) & 0xFF;
+    } else {
+        accumulator[amux] = (mar & 0xFF);
+    }
+    nextState = &x00;
+}
+
+void x26() {
+    currentState = 0x26;
+    if(!f1) {
+        if(!f2)
+            mar = (mar & 0xFF00) | ia;
+        else
+            accumulator[amux] = ia;
+    } else {
+        if(!f2)
+            mar = (mar & 0x00FF) | (ia << 8);
+        else
+            accumulator[amux] = ia;
+    }
+    nextState = &x00;
+}
+
 void exception() {
     currentState = 0xFF;
     /* Some sort of exception */
-    halted = 1;
+    /*halted = 1;*/
+    nextState = &x00;
 }

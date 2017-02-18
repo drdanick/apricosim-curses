@@ -13,7 +13,8 @@ Apricos Architecture
 $ip    16-bit instruction pointer
 $mr    16-bit memory address register
 $dr    8-bit memory data register
-$ir    8-bit instruction register
+$ir    16-bit instruction register
+$ia    8-bit optional instruction argument
 $sp    8-bit Stack register (Or stack pointer)
 $ar1-4 4 8-bit accumulators
 $fr    8-bit CPU status flags register
@@ -42,9 +43,9 @@ OP Code	|  Instruction	|  Description
 0110	|  LD		|  Load a value from memory into the accumulator
 0111	|  LDI		|  Load a value from memory using an immediate PC offset
 1000	|  ST		|  Store the accumulator to memory
-1001	|  STI		|  Store the accumulator to memory using an immesiate PC offset
+1001	|  STI		|  Store the accumulator to memory using an immediate PC offset
 1010	|  STK		|  Stack push/pop
-1011	|  LEA		|  Load the effective address of a PC offset into memory
+1011	|  LA		|  Store an immediate address into the MAR or the accumulator
 1100	|  BR		|  Branch
 1101	|  PRT		|  Port I/O
 1110	|  ASET  	|  Set the current active accumulator
@@ -133,7 +134,8 @@ else
  LDI
 -----
 
-0111 ipoffset(4)
+0111 xxxx
+ipoffset(8)
 
 $ar = memory[$ip + ipoffset]
 
@@ -157,7 +159,8 @@ else
  STI
 -----
 
-1001 ipoffset(4)
+1001 xxxx
+ipoffset(8)
 
 memory[$ip + ipoffset] = $ar
 
@@ -191,24 +194,36 @@ else:
     memory[$sp] = $ar
 
 -----
- LEA
+ LA
 -----
 
-1011 getMSB(1) ipOffset(3)
+1011 loadHigh(1) destination(1) xx
+address(8)
 
-if getMSB == 1:
-    $ar = ($ip + ipOffset) >> 8
+if loadHigh == 0:
+    if destination == 0:
+        $mr[0-7] = address
+    else:
+        $ar = address
 else:
-    $ar = ($ip + ipOffset) & 0x00FF
+    if destination == 0:
+        $mr[8-15] = address
+    else:
+        $ar = address
 
 ----
  BR
 ----
 
-1100 n(1) z(1) p(1) x
+1100 n(1) z(1) p(1) useImmAddress(1)
+immAddress(8)
 
-if (n == 1 && $fr[N] == 1) || (z == 1 && $fr[Z] == 1) || (p == 1 && $fr[P] == 1):
-    $ip = $mr
+if (!useImmAddress):
+    if (n == 1 && $fr[N] == 1) || (z == 1 && $fr[Z] == 1) || (p == 1 && $fr[P] == 1):
+        $ip = $mr
+else:
+    $ip[0-7] = immAddress
+
 
 
 -----
@@ -231,3 +246,13 @@ else
 
 Set the current active accumulator to accumulator #aID
 
+
+============
+ TODO/NOTES
+============
+
+It should be possible for offset based instructions 
+to conditionally load an extra byte dependant on whether 
+any of the last 4 bits of the instruction is non-zero. 
+This is subject to implementation complications, and 
+will be explored in the future.

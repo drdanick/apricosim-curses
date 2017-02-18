@@ -12,6 +12,7 @@ a.out
 
 # Apricosim
 aprsim
+aprsim.exe
 
 # Make/Automake/Autoconf/Configure
 .deps/
@@ -26,3 +27,7 @@ install-sh
 Makefile
 Makefile.in
 missing
+
+# Apricot disk images and binaries
+*.dsk
+*.bin

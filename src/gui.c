@@ -1,11 +1,35 @@
 #include "gui.h"
 #include "cpu.h"
+#include "signal.h"
+
+void handle_winch(int sig) {
+    destroygui();
+    refresh(); /* This forces ncurses to pick up the new term size */
+    
+    clear();
+
+    initgui();
+    refreshRegisterDisplay(); 
+    refreshMemoryDisplay();
+    refreshStackDisplay();
+    refreshStatusDisplay();
+    refresh();
+    
+    signal(SIGWINCH, handle_winch); /* Required under c89 */
+}
 
 void initgui() {
     int maxX, maxY;
-    rdisplaymode = 1;
-    initscr();
+
+    if(winchHandler != &handle_winch) {
+        initscr();
+        winchHandler = &handle_winch;
+        signal(SIGWINCH, handle_winch);
+        rdisplaymode = 1;
+    }
     nonl();
+    nodelay(stdscr, TRUE);
+    keypad(stdscr, TRUE);
     cbreak();
     noecho();
     typeahead(-1);
@@ -48,7 +72,6 @@ void initgui() {
     wrefresh(registers);
     wrefresh(mainmem);
     wrefresh(stack);
-
 }
 
 void destroygui() {
@@ -71,7 +94,7 @@ void initDimensions(int maxX, int maxY) {
     
     mx = 0;
     my = rh;
-    mw = maxX / 2;
+    mw = (int)(maxX / 1.618f);
     mh = maxY - my;
 
     sx = mw + 1;
@@ -116,10 +139,10 @@ void refreshRegisterDisplay() {
     } else {
         printRegister(registers, "CPU Flags         ", "\n", flags, 8, 0);
         printRegister(registers, "MDR               ", "\n", mdr, 8, 0);
-        printRegister(registers, "IR                ", "\n", ir, 8, 0);
+        printRegister(registers, "IA                ", "\n", ia, 8, 0);
         printRegister(registers, "Stack Pointer     ", "\n", stackpt, 8, 0);
+        printRegister(registers, "IR                ", "\n", ir, 16, 0);
         printRegister(registers, "MAR               ", "\n", mar, 16, 0);
-        waddstr(registers, "\n");
         waddstr(registers, "\n");
         waddstr(registers, "\n");
         waddstr(registers, "\n");
@@ -132,7 +155,7 @@ void refreshRegisterDisplay() {
 
 }
 
-void printMemory(WINDOW* win, int y, int x, int address, int value, int is_breakpoint, int is_pointed_to) {
+void printMemory(WINDOW* win, int y, int x, int address, int value, int is_breakpoint, int is_pointed_to, char* symbol) {
     wmove(win, y, x);
 
     waddstr(win, is_pointed_to ? ">" : " ");
@@ -144,34 +167,76 @@ void printMemory(WINDOW* win, int y, int x, int address, int value, int is_break
     wprintw(win, "\t");
 
     printBinaryString(win, value, 8);
+
+    if(symbol) {
+        wprintw(win, "\t");
+        waddstr(win, symbol);
+    }
+}
+
+void refreshStatusDisplay() {
+    mvwaddstr(mainmem_b, mh - 1,4, "Current state: 0x");
+    printHexString(mainmem_b, currentState, 8);
+    wprintw(mainmem_b, "  Instructions executed: %d  Cycles Executed: %d  Cycle Mode: %s",instructionCount, cycleCount,cyclemode ? ((cyclemode == 1) ? "I MODE" : "R MODE") : "S MODE");
+    wnoutrefresh(mainmem_b);
 }
 
 void refreshMemoryDisplay() {
     int i = 0;
     werase(mainmem);
 
-    for(; i < mh - 2 && i + memdisplay < 65536; i++) {
-        printMemory(mainmem, i, 0, i + memdisplay, memory[memdisplay + i], breakpoints[memdisplay + i], pc == (memdisplay + i));
+    for(; i < mh - 2; i++) {
+        if(i + memdisplay < 65536) {
+            printMemory(
+                    mainmem,
+                    i,
+                    0,
+                    i + memdisplay,
+                    memory[memdisplay + i],
+                    breakpoints[memdisplay + i],
+                    pc == (memdisplay + i),
+                    symbols[memdisplay + i]);
+        } else {
+            wmove(mainmem, i, 0);
+            waddch(mainmem, '~');
+        }
+
 
     }
     
     /* TODO: move status to a seperate window */
-    mvwaddstr(mainmem_b, mh - 1,4, "Current state: 0x");
-    printHexString(mainmem_b, currentState, 8);
-    wprintw(mainmem_b, "  Instructions executed: %d  Cycles Executed: %d  Cycle Mode: %s",instructionCount, cycleCount,cyclemode ? "C MODE" : "I MODE");
     wnoutrefresh(mainmem);
-    wnoutrefresh(mainmem_b);
 }
 
 void refreshStackDisplay() {
     int i = 0;
     werase(stack);
 
-    for(; i < sh - 2 && i + stackdisplay < 256; i++) {
-        printMemory(stack, i, 0, i + stackdisplay, stackmem[stackdisplay + i], 0, stackpt == (stackdisplay + i));
+    for(; i < sh - 2; i++) {
+        if(i + stackdisplay < 256) {
+            printMemory(
+                    stack,
+                    i,
+                    0,
+                    i + stackdisplay,
+                    stackmem[stackdisplay + i],
+                    0,
+                    stackpt == (stackdisplay + i),
+                    NULL);
+        } else {
+            wmove(stack, i, 0);
+            waddch(stack, '~');
+        }
     }
     wnoutrefresh(stack);
     
+}
+
+void refreshAll() {
+    refreshMemoryDisplay();
+    refreshStackDisplay();
+    refreshRegisterDisplay();
+    refreshStatusDisplay();
 }
 
 void printRegister(WINDOW* win, char* name, char* suffix, int value, int size, char mark) {

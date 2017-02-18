@@ -10,6 +10,29 @@
 ----------
  * Fixed issue with LDa/STa not manipulating $mar correctly
 
+ Experimental changes
+----------------------
+ * Added support for 8 bit offset arguments
+ * LDa now grabs the value in $mar and places it in $ax
+ * BR can now jump using either the value in $mar, or by using an 8-bit block local address without modifying $mar.
+ * LEA replaced with LA.
+ * Added support for terminal resizing.
+ * PGup/PGdn now move the memory display up/down 256 lines respectively.
+ * Added support for TTY output via serial.
+ * Added support for TTY output via a FIFO file.
+ * Extended LA to allow loading an address directly into a register.
+ * Added the ability to interrupt and quit the emulator while in 'RUN' mode.
+ * Resized the stack display to give more space to the memory display
+ * Added support for displaying symbols output from the Apricos Assembler
+
+ V0.8.2
+----------
+ * GUI code cleanup to fix bugs with some ncurses builds
+
+ V0.8.1
+----------
+ * Fixed issue with LDa/STa not manipulating $mar correctly
+
  V0.8
 ----------
  * Added support for variable shifts
