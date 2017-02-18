@@ -2,8 +2,8 @@
  APRICOSIM VERSION HISTORY
 ===========================
 
- Experimental changes
-----------------------
+ V0.9
+----------
  * Added support for 8 bit offset arguments
  * LDa now grabs the value in $mar and places it in $ax
  * BR can now jump using either the value in $mar, or by using an 8-bit block local address without modifying $mar.
