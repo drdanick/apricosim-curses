@@ -43,12 +43,12 @@ Running
 
 To run the simulator without any programs, enter `aprsim` in your shell.
 
-Besides running with no input, the simulator supports a number of command line parameters to customise execution:
-`--version`          /  `-v`   Print version information and exit.
-`--help`             /  `-h`   Print program usage information.
-`--fifo_tty_file`    /  `-f`   Set fifo tty file. (Only if compiled with `enable-tty-emulation`)
-`--serial_tty_file`  /  `-f`   Set serial tty file. (Only if compiled with `enable-tty-emulation`)
-`--symbols`          /  `-s`   Load a symbols file.
+Besides running with no input, the simulator supports a number of command line parameters to customise execution:  
+`--version`          /  `-v`   Print version information and exit.  
+`--help`             /  `-h`   Print program usage information.  
+`--fifo_tty_file`    /  `-f`   Set fifo tty file. (Only if compiled with `enable-tty-emulation`)  
+`--serial_tty_file`  /  `-f`   Set serial tty file. (Only if compiled with `enable-tty-emulation`)  
+`--symbols`          /  `-s`   Load a symbols file.  
 
 Program binaries are listed after all other arguments, and are separated by spaces.
 
