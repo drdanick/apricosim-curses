@@ -4,7 +4,6 @@
 #ifdef PORT_EMU
 #include "ports.h"
 #endif
-
 #include <unistd.h>
 
 Settings settings;

@@ -201,6 +201,7 @@ void refreshMemoryDisplay() {
             waddch(mainmem, '~');
         }
 
+
     }
     
     /* TODO: move status to a seperate window */
