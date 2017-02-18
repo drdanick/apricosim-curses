@@ -68,14 +68,12 @@ void setflags() {
 void x00() {
     currentState = 0x00;
     mdr = memory[pc];
-    /*mar = pc;*/
     nextState = &x01;
 }
 
 void x01() {
     currentState = 0x01;
     pc++;
-    /* experimental */
     ir = mdr;
     switch((ir & 0xF0) >> 4) {
         case LDI:
@@ -92,7 +90,6 @@ void x01() {
 void x02() {
     /* This state is no longer used */
     currentState = 0x02;
-    /*mdr = memory[mar];*/
     nextState = &x03;
 }
 
@@ -106,8 +103,6 @@ char f4;
 
 void x03() {
     currentState = 0x03;
-    /*ir = mdr;*/
-    /* experimental */
     ia = (ir >> 8) & 0x0FF;
 
     imm4 = ir & 0x0F;
@@ -258,9 +253,7 @@ void x0D() {
 
 void x0E() {
     currentState = 0x0E;
-    /* experimental */
     mar += ia;
-    /*mar += imm4;*/
     nextState = &x0F;
 }
 
@@ -294,9 +287,7 @@ void x12() {
 
 void x13() {
     currentState = 0x13;
-    /* experimental */
     mar += ia;
-    /*mar += imm4;*/
     nextState = &x14;
 }
 
@@ -331,7 +322,6 @@ void x17() {
 void x18() {
     currentState = 0x18;
     mdr = accumulator[amux];
-    /*nextState = &x11;*/
     nextState = &x16;
 }
 
@@ -381,9 +371,7 @@ void x1C() {
 
 void x1D() {
     currentState = 0x1D;
-    /* experimental */
     mar += ia;
-    /*mar += imm3;*/
     nextState = &x1E;
 }
 
@@ -425,7 +413,6 @@ void x20() {
 void x21() {
     currentState = 0x21;
     /* move current accumulator into accumulator buffer */
-    /*swapaccum[2] = accumulator;*/
     nextState = &x22;
 }
 
@@ -436,7 +423,6 @@ void x22() {
     nextState = &x00;
 }
 
-/* experimental */
 /* Fetch ia and increment pc*/
 void x23() {
     currentState = 0x23;
@@ -478,7 +464,6 @@ void x26() {
     }
     nextState = &x00;
 }
-/* End experimental */
 
 void exception() {
     currentState = 0xFF;
