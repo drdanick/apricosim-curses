@@ -164,7 +164,7 @@ int main(int argc, char** argv) {
         } else if(c == 'r'){
             rdisplaymode = !rdisplaymode;
             refreshRegisterDisplay();
-        }else if(c == 'q' || c == 'Q') {
+        }else if(c == 'q' || c == 'Q' || c == KEY_F(1)) {
             break;
         }
 

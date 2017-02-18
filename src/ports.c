@@ -60,6 +60,11 @@ void portIO(unsigned int portId, unsigned int writeMode) {
             case 1:    /* Keyboard Status Register */
                 inbuff = getch();
 
+                if(inbuff == KEY_F(1)) {
+                    ungetch(inbuff);
+                }
+                
+
                 if(inbuff > 0xFF)
                     inbuff = 0;
 
@@ -70,11 +75,18 @@ void portIO(unsigned int portId, unsigned int writeMode) {
                     accumulator[amux] = 1;
                 }
 
+                
+
                 break;
             case 2:    /* Keyboard Input */
                 /* Block and poll for keyboard input unless a chaaracter was buffered by a status check */
                 for(;;) {
                     charin = getch();
+
+                    if(charin == KEY_F(1)) {
+                        ungetch(charin);
+                        break;
+                    }
 
                     if(charin > 0xFF)
                         charin = 0;
