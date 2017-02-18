@@ -86,13 +86,20 @@ int main(int argc, char** argv) {
 
     settings = getSettingsFromArgs(argc, argv);
 
+#ifdef TTY_EMU
+    if(settings.fifoFile && settings.serialFile) {
+        fprintf(stderr, "ERROR: Fifo file and serial file cannot be both set!\n");
+        exit(EXIT_FAILURE);
+    }
+#endif /* TTY_EMU */
+
     signal(SIGINT, finish);
     cyclemode = 0;
 
     resetMachine();
 
 #ifdef PORT_EMU
-    initPorts();
+    initPorts(settings);
 #endif
 
     for(i = 0; i < settings.binFileCount; i++)

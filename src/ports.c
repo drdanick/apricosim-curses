@@ -2,6 +2,7 @@
 #include "ports.h"
 #include "cpu.h"
 #include "gui.h"
+#include "argparser.h"
 
 #ifdef DISK_EMU
 #include "diskio.h"
@@ -23,29 +24,40 @@ int ttyHandle = 0;
 int fd;
 #endif
 
-void initPorts() {
+Settings settings;
+
+void initPorts(Settings s) {
+    settings = s;
 #ifdef TTY_EMU
     /*Set up tty*/
-    fd = open("/tmp/apricosfifo", O_WRONLY); /* hardcoded for now */
-    /*struct termios options;
+    if(settings.fifoFile) {
+        fd = open(settings.fifoFile, O_WRONLY);
+    } else if(settings.serialFile) {
+        struct termios options;
 
-    ttyHandle = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY);
-    if(ttyHandle != -1) {
-        tcgetattr(ttyHandle, &options);
+        ttyHandle = open(settings.serialFile, O_RDWR | O_NOCTTY);
 
-        cfsetispeed(&options, B9600);
-        cfsetospeed(&options, B9600);
+        /* Set serial settings
+         * (values are hard-coded for my uVGA board, which 
+         * receives data at 9600 baud over USB. These can be reconfigured 
+         * for other devices as necessary) */
+        if(ttyHandle != -1) {
+            tcgetattr(ttyHandle, &options);
 
-        cfmakeraw(&options);
-        options.c_cflag |= (CLOCAL | CREAD);   /* Enable the receiver and set local mode /
-        options.c_cflag &= ~CSTOPB;            /* 1 stop bit /
-        options.c_cc[VMIN]  = 1;
-        options.c_cc[VTIME] = 2;
+            cfsetispeed(&options, B9600);
+            cfsetospeed(&options, B9600);
 
-        tcsetattr(ttyHandle, TCSANOW, &options);
-    } else {
-        ttyHandle = 0;
-    }*/
+            cfmakeraw(&options);
+            options.c_cflag |= (CLOCAL | CREAD);   /* Enable the receiver and set local mode */
+            options.c_cflag &= ~CSTOPB;            /* 1 stop bit */
+            options.c_cc[VMIN]  = 1;
+            options.c_cc[VTIME] = 2;
+
+            tcsetattr(ttyHandle, TCSANOW, &options);
+        } else {
+            ttyHandle = 0;
+        }
+    }
 #endif /*TTY_EMU*/
 }
 
@@ -104,7 +116,7 @@ void portIO(unsigned int portId, unsigned int writeMode) {
                 accumulator[amux] = getDiskStatus();
 #else
                 accumulator[amux] = 0;
-#endif
+#endif /* DISK_EMU */
                 break;
             case 4:    /* NOP */
                 break;
@@ -156,10 +168,13 @@ void portIO(unsigned int portId, unsigned int writeMode) {
                 break;
             case 7:    /* TTY Write */
 #ifdef TTY_EMU
-                write(fd, &accumulator[amux], 1);
-                /*write(ttyHandle, &accumulator[amux], 1);*/
-                /*ioctl(ttyHandle, TCIOFLUSH);*/
-#endif
+                if(settings.fifoFile) {
+                    write(fd, &accumulator[amux], 1);
+                } else if(settings.serialFile) {
+                    write(ttyHandle, &accumulator[amux], 1);
+                    ioctl(ttyHandle, TCIOFLUSH);
+                }
+#endif /* TTY_EMU */
                 break;
             default:   /* NOP */
                 break;

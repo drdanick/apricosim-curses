@@ -15,8 +15,10 @@ typedef struct {
 const static struct option long_options[] = {
     {"version", no_argument, 0, 'v'},
     {"help", no_argument, 0, 'h'},
+#ifdef TTY_EMU
     {"fifo_tty_file", required_argument, 0, 'f'},
     {"serial_tty_file", required_argument, 0, 'u'},
+#endif /* TTY_EMU */
     {"symbols", required_argument, 0, 's'},
     {0, 0, 0, 0}
 };
@@ -24,8 +26,10 @@ const static struct option long_options[] = {
 const static char* option_descriptions[] = {
     "Print version information and exit",
     "Print this message and exit",
+#ifdef TTY_EMU
     "Set fifo tty file",
     "Set serial tty file",
+#endif /* TTY_EMU */
     "Load symbols file"
 };
 
