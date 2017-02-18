@@ -2,14 +2,6 @@
  APRICOSIM VERSION HISTORY
 ===========================
 
- V0.8.2
-----------
- * GUI code cleanup to fix bugs with some ncurses builds
-
- V0.8.1
-----------
- * Fixed issue with LDa/STa not manipulating $mar correctly
-
  Experimental changes
 ----------------------
  * Added support for 8 bit offset arguments
