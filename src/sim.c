@@ -192,7 +192,7 @@ void mainloop() {
     }
 }
 
-int main(int argc, char** argv) {
+void main(int argc, char** argv) {
     int temp = 0;
     int i;
 
