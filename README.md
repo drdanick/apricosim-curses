@@ -47,7 +47,7 @@ Besides running with no input, the simulator supports a number of command line p
 `--version`          /  `-v`   Print version information and exit.  
 `--help`             /  `-h`   Print program usage information.  
 `--fifo_tty_file`    /  `-f`   Set fifo tty file. (Only if compiled with `enable-tty-emulation`)  
-`--serial_tty_file`  /  `-f`   Set serial tty file. (Only if compiled with `enable-tty-emulation`)  
+`--serial_tty_file`  /  `-u`   Set serial device tty file. (Only if compiled with `enable-tty-emulation`)  
 `--symbols`          /  `-s`   Load a symbols file.  
 
 Program binaries are listed after all other arguments, and are separated by spaces.
