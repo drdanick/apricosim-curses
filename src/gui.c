@@ -2,6 +2,8 @@
 #include "cpu.h"
 #include "signal.h"
 
+/* TODO: This code is a hack job, and needs an urgent rewrite */
+
 void handle_winch(int sig) {
     destroygui();
     refresh(); /* This forces ncurses to pick up the new term size */
@@ -27,6 +29,7 @@ void initgui() {
         signal(SIGWINCH, handle_winch);
         rdisplaymode = 1;
     }
+
     nonl();
     nodelay(stdscr, TRUE);
     keypad(stdscr, TRUE);
@@ -43,11 +46,12 @@ void initgui() {
     registers_b = newwin(rh, rw, ry, rx);
     mainmem_b = newwin(mh, mw, my, mx);
     stack_b = newwin(sh, sw, sy, sx);
+    info_b = newwin(ih, iw, iy, ix);
 
     registers = subwin(registers_b, rh-2, rw-2, ry+1, rx+1);
     mainmem = subwin(mainmem_b, mh-2, mw-2, my+1, mx+1);
     stack = subwin(stack_b, sh-2, sw-2, sy+1, sx+1);
-
+    info = subwin(info_b, ih-2, iw-2, iy+1, ix+1);
 
     scrollok(mainmem, 1);
     scrollok(stack, 1);
@@ -62,14 +66,17 @@ void initgui() {
     box(registers_b,0,0);
     box(mainmem_b,0,0);
     box(stack_b,0,0);
+    box(info_b,0,0);
     mvwprintw(registers_b, 0, 2, " Registers ");
     mvwprintw(stack_b, 0, 2, " Stack ");
     mvwprintw(mainmem_b, 0, 2, " Memory ");
 
     wrefresh(registers_b);
+    wrefresh(info_b);
     wrefresh(mainmem_b);
     wrefresh(stack_b);
     wrefresh(registers);
+    wrefresh(info);
     wrefresh(mainmem);
     wrefresh(stack);
 }
@@ -83,6 +90,8 @@ void destroygui() {
     delwin(stack_b);
     delwin(registers);
     delwin(registers_b);
+    delwin(info);
+    delwin(info_b);
     endwin();
 }
 
@@ -90,17 +99,22 @@ void initDimensions(int maxX, int maxY) {
     rx = 0;
     ry = 0;
     rw = maxX;
-    rh = 13;
+    rh = 12;
 
     mx = 0;
     my = rh;
     mw = (int)(maxX / 1.618f);
-    mh = maxY - my;
+    mh = maxY - my - 2;
 
-    sx = mw + 1;
+    sx = mw;
     sy = my;
     sw = maxX - sx;
     sh = mh;
+
+    ix = 0;
+    iy = my + mh - 1;
+    iw = maxX;
+    ih = 3;
 }
 
 void refreshRegisterDisplay() {
@@ -132,7 +146,6 @@ void refreshRegisterDisplay() {
         printRegister(registers, "A15", "\n", accumulator[15], 8, (amux == 15));
 
         waddstr(registers, "\n");
-        waddstr(registers, "\n");
         printRegister(registers, "Program Counter   ", "\n", pc, 16, 0);
 
 
@@ -146,13 +159,10 @@ void refreshRegisterDisplay() {
         waddstr(registers, "\n");
         waddstr(registers, "\n");
         waddstr(registers, "\n");
-        waddstr(registers, "\n");
         printRegister(registers, "Program Counter   ", "\n", pc, 16, 0);
     }
 
-
     wnoutrefresh(registers);
-
 }
 
 void printMemory(WINDOW* win, int y, int x, int address, int value, int is_breakpoint, int is_pointed_to, char* symbol) {
@@ -175,10 +185,15 @@ void printMemory(WINDOW* win, int y, int x, int address, int value, int is_break
 }
 
 void refreshStatusDisplay() {
-    mvwaddstr(mainmem_b, mh - 1,4, "Current state: 0x");
-    printHexString(mainmem_b, currentState, 8);
-    wprintw(mainmem_b, "  Instructions executed: %d  Cycles Executed: %d  Cycle Mode: %s",instructionCount, cycleCount,cyclemode ? ((cyclemode == 1) ? "I MODE" : "R MODE") : "S MODE");
-    wnoutrefresh(mainmem_b);
+    mvwaddstr(info, 0,4, "Current state: 0x");
+    printHexString(info, currentState, 8);
+    wprintw(info, "  Instructions executed: %d  Cycles Executed: %d  Cycle Mode: %s",instructionCount, cycleCount,cyclemode ? ((cyclemode == 1) ? "I MODE" : "R MODE") : "S MODE");
+
+    mvhline(iy, 0, 0, iw);
+    mvvline(iy, 0, 0, 1);
+    mvvline(iy, iw - 1, 0, 1);
+
+    wnoutrefresh(info);
 }
 
 void refreshMemoryDisplay() {
@@ -200,8 +215,6 @@ void refreshMemoryDisplay() {
             wmove(mainmem, i, 0);
             waddch(mainmem, '~');
         }
-
-
     }
 
     /* TODO: move status to a seperate window */

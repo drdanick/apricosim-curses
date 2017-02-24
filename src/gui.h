@@ -36,8 +36,10 @@ WINDOW *mainmem_b;
 WINDOW *mainmem;
 WINDOW *stack_b;
 WINDOW *stack;
+WINDOW *info_b;
+WINDOW *info;
 
-int rx, ry, rw, rh, mx, my, mw, mh, sx, sy, sw, sh; /* GUI dimensions and coordinates */
+int rx, ry, rw, rh, mx, my, mw, mh, sx, sy, sw, sh, ix, iy, iw, ih; /* GUI dimensions and coordinates */
 
 unsigned int memdisplay; /* Memory display offset */
 unsigned int stackdisplay; /* Stack display offset */
