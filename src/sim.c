@@ -45,7 +45,7 @@ void loadSymbolsFile(char* filename) {
     char lineBuff[512];
     char symbolNameBuff[256];
     int symbolLocation;
- 
+
     while(fgets(lineBuff, sizeof(lineBuff), f)) {
         sscanf(lineBuff, "%d:%[^\n]", &symbolLocation, symbolNameBuff);
 
@@ -77,11 +77,124 @@ static void finish(int sig) {
     exit(0);
 }
 
-int main(int argc, char** argv) {
-    int temp = 0;
+void mainloop() {
     char docycle = 0;
     char running = 0; /* Needed so we can do a full GUI refresh if we break out of a run */
-    int c, i;
+    int c;
+
+    for(;;) {
+        if(c = getch(), c == ERR && !docycle) {
+            /* Prevent this busy wait from consuming too much CPU time */
+            usleep(10);
+            continue;
+        }
+
+        switch(c) {
+            /* This should be a switch-case block. if-elseif blocks probably won't generate optimal assembly */
+            case ' ':
+                docycle = !docycle;
+                break;
+            case 'j':
+                if(memdisplay < 65535) {
+                    memdisplay++;
+                    scroll(mainmem);
+                    if(memdisplay < 65536 - (mh - 3))
+                        printMemory(mainmem, mh-3, 0, memdisplay + (mh - 3), memory[memdisplay + (mh - 3)], breakpoints[memdisplay + (mh - 3)], pc == (memdisplay + (mh - 3)), symbols[memdisplay + (mh - 3)]);
+                    else
+                        mvwaddch(mainmem, mh - 3, 0, '~');
+                    wnoutrefresh(mainmem);
+                }
+                break;
+            case 'k':
+                if(memdisplay > 0) {
+                    memdisplay--;
+                    wscrl(mainmem, -1);
+                    printMemory(mainmem, 0, 0, memdisplay, memory[memdisplay], breakpoints[memdisplay], pc == memdisplay, symbols[memdisplay]);
+                    wnoutrefresh(mainmem);
+                }
+                break;
+            case 'J':
+                if(stackdisplay < 255) {
+                    stackdisplay++;
+                    scroll(stack);
+                    if(stackdisplay < 256 - (sh -3))
+                        printMemory(stack, sh-3, 0, stackdisplay + (sh - 3), stackmem[stackdisplay + (sh - 3)], 0, stackpt == (stackdisplay + (sh - 3)), NULL);
+                    else
+                        mvwaddch(stack, sh - 3, 0, '~');
+                    wnoutrefresh(stack);
+                }
+                break;
+            case 'K':
+                if(stackdisplay > 0) {
+                    stackdisplay--;
+                    wscrl(stack, -1);
+                    printMemory(stack, 0, 0, stackdisplay, stackmem[stackdisplay], 0, stackpt == stackdisplay, NULL);
+
+                    wnoutrefresh(stack);
+                }
+                break;
+            case KEY_NPAGE: /* page down */
+                memdisplay += 0x0100;
+                if(memdisplay > 0xFFFF)
+                    memdisplay = 0xFFFF;
+                refreshMemoryDisplay();
+                break;
+            case KEY_PPAGE:
+                if(memdisplay > 0x0100)
+                    memdisplay -= 0x0100;
+                else
+                    memdisplay = 0;
+                refreshMemoryDisplay();
+                break;
+            case 'b':
+                breakpoints[memdisplay] = (breakpoints[memdisplay] + 1) & 0x01;
+                refreshMemoryDisplay();
+                break;
+            case 'm':
+                cyclemode = (cyclemode + 1) % 3;
+                refreshStatusDisplay();
+                break;
+            case 'r':
+                rdisplaymode = !rdisplaymode;
+                refreshRegisterDisplay();
+                break;
+            case 'q':
+            case 'Q':
+            case KEY_F(1):
+                return;
+        }
+
+        /* Perform a cycle if required */
+        if(docycle) {
+            do {
+                cycle();
+            } while(cyclemode && nextState != &x00);
+
+            if(cyclemode != 2) {
+                refreshMemoryDisplay();
+                refreshStackDisplay();
+                refreshRegisterDisplay();
+            }
+            refreshStatusDisplay();
+
+            if(cyclemode != 2 || breakpoints[pc])
+                docycle = 0;
+            else
+                running = 1;
+        }
+
+        if(!docycle && running) {
+            running = 0;
+            refreshAll();
+        }
+
+        refresh();
+    }
+}
+
+int main(int argc, char** argv) {
+    int temp = 0;
+    int i;
 
     settings = getSettingsFromArgs(argc, argv);
 
@@ -112,95 +225,7 @@ int main(int argc, char** argv) {
     refreshAll();
     refresh();
 
-    for(;;) {
-        if(c = getch(), c == ERR && !docycle) {
-            /* Prevent this busy wait from consuming too much CPU time */
-            usleep(10);
-            continue;
-        }
-
-        /* This should be a switch-case block. if-elseif blocks probably won't generate optimal assembly */
-        if(c == ' ') {
-            docycle = !docycle;
-        }else if(c == 'j' && memdisplay < 65535) {
-            memdisplay++;
-            scroll(mainmem);
-            if(memdisplay < 65536 - (mh - 3))
-                printMemory(mainmem, mh-3, 0, memdisplay + (mh - 3), memory[memdisplay + (mh - 3)], breakpoints[memdisplay + (mh - 3)], pc == (memdisplay + (mh - 3)), symbols[memdisplay + (mh - 3)]);
-            else
-                mvwaddch(mainmem, mh - 3, 0, '~');
-            wnoutrefresh(mainmem);
-        } else if(c == 'k' && memdisplay > 0) {
-            memdisplay--;
-            wscrl(mainmem, -1);
-            printMemory(mainmem, 0, 0, memdisplay, memory[memdisplay], breakpoints[memdisplay], pc == memdisplay, symbols[memdisplay]);
-            wnoutrefresh(mainmem);
-        } else if(c == 'J' && stackdisplay < 255) {
-            stackdisplay++;
-            scroll(stack);
-            if(stackdisplay < 256 - (sh -3))
-                printMemory(stack, sh-3, 0, stackdisplay + (sh - 3), stackmem[stackdisplay + (sh - 3)], 0, stackpt == (stackdisplay + (sh - 3)), NULL);
-            else
-                mvwaddch(stack, sh - 3, 0, '~');
-            wnoutrefresh(stack);
-
-        } else if(c == 'K' && stackdisplay > 0) {
-            stackdisplay--;
-            wscrl(stack, -1);
-            printMemory(stack, 0, 0, stackdisplay, stackmem[stackdisplay], 0, stackpt == stackdisplay, NULL);
-
-            wnoutrefresh(stack);
-        } else if(c == KEY_NPAGE) { /* page down */
-            memdisplay += 0x0100;
-            if(memdisplay > 0xFFFF)
-                memdisplay = 0xFFFF;
-            refreshMemoryDisplay();
-        } else if(c == KEY_PPAGE) { /* page up */
-            if(memdisplay > 0x0100)
-                memdisplay -= 0x0100;
-            else
-                memdisplay = 0;
-            refreshMemoryDisplay();
-        } else if(c == 'b') {
-            breakpoints[memdisplay] = (breakpoints[memdisplay] + 1) & 0x01;
-            refreshMemoryDisplay();
-        } else if(c == 'm') {
-            cyclemode = (cyclemode + 1) % 3;
-            refreshStatusDisplay();
-        } else if(c == 'r'){
-            rdisplaymode = !rdisplaymode;
-            refreshRegisterDisplay();
-        }else if(c == 'q' || c == 'Q' || c == KEY_F(1)) {
-            break;
-        }
-
-        /* Perform a cycle if required */
-        if(docycle) {
-            do {
-                cycle();
-            } while(cyclemode && nextState != &x00);
-
-            if(cyclemode != 2) {
-                refreshMemoryDisplay();
-                refreshStackDisplay();
-                refreshRegisterDisplay();
-            }
-            refreshStatusDisplay();
-
-            if(cyclemode != 2 || breakpoints[pc])
-                docycle = 0;
-            else
-                running = 1;
-        }
-
-        if(!docycle && running) {
-            running = 0;
-            refreshAll();
-        }
-
-        refresh();
-    }
+    mainloop();
 
     finish(0);
 }
-
