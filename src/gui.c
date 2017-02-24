@@ -2,7 +2,7 @@
 #include "cpu.h"
 #include "signal.h"
 
-/* TODO: This code is a hack job, and needs an urgent rewrite */
+/* TODO: This code is a hack job, and needs a rewrite */
 
 void handle_winch(int sig) {
     destroygui();
@@ -217,7 +217,6 @@ void refreshMemoryDisplay() {
         }
     }
 
-    /* TODO: move status to a seperate window */
     wnoutrefresh(mainmem);
 }
 
@@ -241,8 +240,8 @@ void refreshStackDisplay() {
             waddch(stack, '~');
         }
     }
-    wnoutrefresh(stack);
 
+    wnoutrefresh(stack);
 }
 
 void refreshAll() {
