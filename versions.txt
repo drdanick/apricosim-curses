@@ -5,6 +5,7 @@
  Pre-release
 ----------
  * Added the ability to jump to current program counter value in memory display.
+ * Status bar moved into its own window
 
  V0.9
 ----------
