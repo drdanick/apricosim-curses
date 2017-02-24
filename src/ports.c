@@ -15,6 +15,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <errno.h>
 
 char diskFileName[] = "x.dsk";
 int inbuff = -1;
@@ -31,15 +32,22 @@ void initPorts(Settings s) {
 #ifdef TTY_EMU
     /*Set up tty*/
     if(settings.fifoFile) {
+        if(mkfifo(settings.fifoFile, 0666) && errno != EEXIST)
+            return;
+
+        printf("Waiting for terminal @%s... ", settings.fifoFile);
+        fflush(stdout);
+
         fd = open(settings.fifoFile, O_WRONLY);
+        printf("Connected!\n");
     } else if(settings.serialFile) {
         struct termios options;
 
         ttyHandle = open(settings.serialFile, O_RDWR | O_NOCTTY);
 
         /* Set serial settings
-         * (values are hard-coded for my uVGA board, which 
-         * receives data at 9600 baud over USB. These can be reconfigured 
+         * (values are hard-coded for my uVGA board, which
+         * receives data at 9600 baud over USB. These can be reconfigured
          * for other devices as necessary) */
         if(ttyHandle != -1) {
             tcgetattr(ttyHandle, &options);
@@ -75,7 +83,7 @@ void portIO(unsigned int portId, unsigned int writeMode) {
                 if(inbuff == KEY_F(1)) {
                     ungetch(inbuff);
                 }
-                
+
 
                 if(inbuff > 0xFF)
                     inbuff = 0;
@@ -87,7 +95,7 @@ void portIO(unsigned int portId, unsigned int writeMode) {
                     accumulator[amux] = 1;
                 }
 
-                
+
 
                 break;
             case 2:    /* Keyboard Input */
