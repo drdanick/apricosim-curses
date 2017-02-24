@@ -158,6 +158,10 @@ void mainloop() {
                 rdisplaymode = !rdisplaymode;
                 refreshRegisterDisplay();
                 break;
+            case 'p':
+                memdisplay = pc;
+                refreshMemoryDisplay();
+                break;
             case 'q':
             case 'Q':
             case KEY_F(1):

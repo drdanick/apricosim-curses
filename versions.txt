@@ -2,6 +2,10 @@
  APRICOSIM VERSION HISTORY
 ===========================
 
+ Pre-release
+----------
+ * Added the ability to jump to current program counter value in memory display.
+
  V0.9
 ----------
  * Added support for 8 bit offset arguments

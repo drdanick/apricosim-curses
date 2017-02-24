@@ -60,6 +60,7 @@ The simulator can be operated with the following controls:
 `j/k`         Scroll the memory display down/up.  
 `J/K`         Scroll the stack display down/up.  
 `PGdown/PGup` Scroll the memory display 256 lines down/up.  
+`p`           Jump to program counter position in memory display.  
 `r`           Toggle between register and CPU status display modes.  
 `b`           Toggle a breakpoint.  
 `m`           Toggle between state execution and instruction execution modes.  
