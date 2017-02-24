@@ -33,6 +33,7 @@ Settings getSettingsFromArgs(int argc, char** argv) {
     s.serialFile = NULL;
     s.symbolsFile = NULL;
     s.fifoFile = NULL;
+    s.binFiles = NULL;
 #ifdef TTY_EMU
     while(c = getopt_long(argc, argv, "vhf:u:s:", long_options, NULL), c != -1) {
 #else
@@ -81,5 +82,6 @@ Settings getSettingsFromArgs(int argc, char** argv) {
 }
 
 void freeSettings(Settings s) {
-    free(s.binFiles);
+    if(s.binFiles)
+        free(s.binFiles);
 }
