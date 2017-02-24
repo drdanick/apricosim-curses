@@ -5,16 +5,16 @@
 void handle_winch(int sig) {
     destroygui();
     refresh(); /* This forces ncurses to pick up the new term size */
-    
+
     clear();
 
     initgui();
-    refreshRegisterDisplay(); 
+    refreshRegisterDisplay();
     refreshMemoryDisplay();
     refreshStackDisplay();
     refreshStatusDisplay();
     refresh();
-    
+
     signal(SIGWINCH, handle_winch); /* Required under c89 */
 }
 
@@ -51,7 +51,7 @@ void initgui() {
 
     scrollok(mainmem, 1);
     scrollok(stack, 1);
-    
+
     idlok(stdscr, 1);
     idcok(stdscr, 1);
 
@@ -91,7 +91,7 @@ void initDimensions(int maxX, int maxY) {
     ry = 0;
     rw = maxX;
     rh = 13;
-    
+
     mx = 0;
     my = rh;
     mw = (int)(maxX / 1.618f);
@@ -106,7 +106,7 @@ void initDimensions(int maxX, int maxY) {
 void refreshRegisterDisplay() {
     werase(registers);
 
-    if(rdisplaymode) { 
+    if(rdisplaymode) {
         printRegister(registers, "A0", "", accumulator[0], 8, (amux == 0));
         printRegister(registers, "A8", "\n", accumulator[8], 8, (amux == 8));
 
@@ -160,7 +160,7 @@ void printMemory(WINDOW* win, int y, int x, int address, int value, int is_break
 
     waddstr(win, is_pointed_to ? ">" : " ");
     waddstr(win, is_breakpoint ? "   @0x" : "    0x");
-    
+
     printHexString(win, address, 16);
     wprintw(win, ":\t");
     printHexString(win, value, 8);
@@ -203,7 +203,7 @@ void refreshMemoryDisplay() {
 
 
     }
-    
+
     /* TODO: move status to a seperate window */
     wnoutrefresh(mainmem);
 }
@@ -229,7 +229,7 @@ void refreshStackDisplay() {
         }
     }
     wnoutrefresh(stack);
-    
+
 }
 
 void refreshAll() {
