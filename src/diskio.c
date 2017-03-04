@@ -6,9 +6,10 @@ FILE* driveFile = NULL;
 int diskID = 0xFFFF;
 int track;
 
-/* 8*256*256 disks (TRACKS*SECTORS*SECTOR_SIZE) */
-#define SECTOR_SIZE 256
-#define TRACK_SIZE  16384  /* (64 * 256) */
+/* 32*64*256 disks (TRACKS*SECTORS*SECTOR_SIZE) */
+#define SECTORS_PER_TRACK 64
+#define SECTOR_SIZE       256
+#define TRACK_SIZE        (SECTORS_PER_TRACK * SECTOR_SIZE)
 
 
 #define TRACK_ID_MASK  0x1F
