@@ -218,11 +218,11 @@ else:
 1100 n(1) z(1) p(1) useImmAddress(1)
 immAddress(8)
 
-if (!useImmAddress):
-    if (n == 1 && $fr[N] == 1) || (z == 1 && $fr[Z] == 1) || (p == 1 && $fr[P] == 1):
+if (n == 1 && $fr[N] == 1) || (z == 1 && $fr[Z] == 1) || (p == 1 && $fr[P] == 1):
+    if (!useImmAddress):
         $ip = $mr
-else:
-    $ip[0-7] = immAddress
+    else:
+        $ip[0-7] = immAddress
 
 
 
