@@ -31,3 +31,6 @@ missing
 # Apricot disk images and binaries
 *.dsk
 *.bin
+
+# Compilation database
+compile_commands.json
