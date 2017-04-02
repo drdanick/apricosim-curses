@@ -126,7 +126,8 @@ void portIO(unsigned int portId, unsigned int writeMode) {
                 accumulator[amux] = 0;
 #endif /* DISK_EMU */
                 break;
-            case 4:    /* NOP */
+            case 4:    /* Read status register */
+                accumulator[amux] = flags;
                 break;
             case 5:    /* NOP */
                 break;
@@ -146,7 +147,7 @@ void portIO(unsigned int portId, unsigned int writeMode) {
             case 1:    /* Keyboard Mode Select */
                 /* Do nothing */
                 break;
-            case 2:    /* NUL */
+            case 2:    /* NUL */ /* TODO: May be used to write to the status register int he future */
                 break;
 #ifdef DISK_EMU
             case 3:    /* Disk Select */
