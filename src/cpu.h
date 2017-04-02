@@ -83,6 +83,7 @@ void exception();
 #define ASET  14
 
 /* CPU Flags */
+#define OVF_FLAG 0x08
 #define NEG_FLAG 0x04
 #define ZER_FLAG 0x02
 #define POS_FLAG 0x01
@@ -98,6 +99,7 @@ void (*nextState)();
 
 /* Registers */
 unsigned char  stackpt, flags, mdr, ia;
+unsigned int  overflow;
 unsigned char  accumulator[ACCUMULATOR_COUNT];
 unsigned short ir;   /* Instruction Register */
 unsigned short mar;  /* Memory Address Register */

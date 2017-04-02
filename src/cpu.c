@@ -17,6 +17,7 @@ void resetMachine() { /* Clear the registers */
     pc = 0;
     amux = 0;
     stackpt = 255;
+    overflow = 0;
 
     for(i = 0; i < ACCUMULATOR_COUNT; i++)
         accumulator[i] = 0;
@@ -53,7 +54,7 @@ void cycle() {
 
 void setflags() {
     /* Clear arithmetic flags */
-    flags &= ~(NEG_FLAG | POS_FLAG | ZER_FLAG);
+    flags &= ~(OVF_FLAG | NEG_FLAG | POS_FLAG | ZER_FLAG);
 
     if(accumulator[amux] & 0x80) /* Mimics hardware implementation */
         flags |= NEG_FLAG;
@@ -61,6 +62,9 @@ void setflags() {
         flags |= POS_FLAG;
     else
         flags |= ZER_FLAG;
+
+    if(overflow)
+        flags |= OVF_FLAG;
 
 }
 
@@ -166,6 +170,9 @@ void x03() {
 
 void x04() {
     currentState = 0x04;
+    /* NOTE: On real hardware, the ALU has a specific output for overflows */
+    overflow = ((int)accumulator[amux] + (int)imm4) & 0xFF00;
+
     accumulator[amux] += imm4;
     setflags();
     nextState = &x00;
@@ -173,6 +180,7 @@ void x04() {
 
 void x05() {
     currentState = 0x05;
+    overflow = 0;
     accumulator[amux] = ~accumulator[amux];
     setflags();
     nextState = &x00;
@@ -180,6 +188,7 @@ void x05() {
 
 void x06() {
     currentState = 0x06;
+    overflow = 0;
     accumulator[amux] &= (imm4 & 0x0F);
     setflags();
     nextState = &x00;
@@ -187,6 +196,7 @@ void x06() {
 
 void x07() {
     currentState = 0x07;
+    overflow = 0;
     accumulator[amux] |= (imm4 & 0x0F);
     setflags();
     nextState = &x00;
@@ -194,6 +204,7 @@ void x07() {
 
 void x08() {
     currentState = 0x08;
+    overflow = 0;
     accumulator[amux] ^= (imm4 & 0x0F);
     setflags();
     nextState = &x00;
@@ -206,10 +217,13 @@ void x08() {
  */
 void x09() {
     currentState = 0x09;
-    if(f1)
+    if(f1) {
+        overflow = 0;
         accumulator[amux] >>= 1;
-    else
+    } else {
+        overflow = ((int)accumulator[amux] << 1) & 0xFF00;
         accumulator[amux] <<= 1;
+    }
     setflags();
 
     if(imm2--)
@@ -230,6 +244,7 @@ void x0A() {
 
 void x0B() {
     currentState = 0x0B;
+    overflow = 0;
     accumulator[amux] = mdr;
     setflags();
     nextState = &x00;
@@ -359,6 +374,7 @@ void x1B() {
         accumulator[amux] = mdr;
     }
 
+    overflow = 0;
     nextState = &x00;
     setflags();
 }
@@ -403,8 +419,10 @@ void x20() {
 #ifdef PORT_EMU
     portIO(imm3, f1);
 
-    if(!f1)
+    if(!f1) {
+        overflow = 0;
         setflags();
+    }
 #endif
     nextState = &x00;
 }
@@ -419,6 +437,7 @@ void x21() {
 void x22() {
     currentState = 0x22;
     amux = imm4;
+    overflow = 0;
     setflags();
     nextState = &x00;
 }

@@ -22,7 +22,8 @@ $fr    8-bit CPU status flags register
 NOTES:
 $ip and $mr are actually adders connected to D flipflops, where the second operand is 4 bits wide.
 
-Flags register: [  .  .  .  .  .  N  Z  P  ]
+Flags register: [  .  .  .  .  O  N  Z  P  ]
+O = Overflowed result
 N = Negative result
 Z = Zero result
 P = Positive result
