@@ -83,7 +83,6 @@ void exception();
 #define ASET  14
 
 /* CPU Flags */
-#define SIG_FLAG 0x08
 #define NEG_FLAG 0x04
 #define ZER_FLAG 0x02
 #define POS_FLAG 0x01
