@@ -355,9 +355,11 @@ void x1A() {
 
 void x1B() {
     currentState = 0x1B;
+    overflow = 0;
     if(f2) {
         switch(imm2) {
         case ADD:
+            overflow = ((int)accumulator[amux] + (int)mdr) & 0xFF00;
             accumulator[amux] += mdr;
             break;
         case AND:
@@ -374,7 +376,6 @@ void x1B() {
         accumulator[amux] = mdr;
     }
 
-    overflow = 0;
     nextState = &x00;
     setflags();
 }
