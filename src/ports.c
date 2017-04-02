@@ -129,7 +129,8 @@ void portIO(unsigned int portId, unsigned int writeMode) {
             case 4:    /* Read status register */
                 accumulator[amux] = flags;
                 break;
-            case 5:    /* NOP */
+            case 5:    /* Read stack pointer */
+                accumulator[amux] = stackpt;
                 break;
             case 6:    /* NOP */
                 break;
