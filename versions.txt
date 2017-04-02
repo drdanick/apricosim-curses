@@ -40,7 +40,7 @@
 
  V0.7
 ----------
- * Added 12 more acumulators. There are now 16 in total.
+ * Added 12 more accumulators. There are now 16 in total.
  * Updated GUI to reflect changes. Register display mode can be changed by pressing 'r'.
 
  V0.6.1
