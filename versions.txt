@@ -6,6 +6,7 @@
 ----------
  * Added the ability to jump to current program counter value in memory display.
  * Status bar moved into its own window
+ * Added arithmetic overflow detection
 
  V0.9
 ----------
