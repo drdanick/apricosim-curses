@@ -8,7 +8,7 @@ Apricos Architecture
 8 bit ISA, 16 possible operations.
 
 
-10 registers:
+23 registers:
 
 $ip    16-bit instruction pointer
 $mr    16-bit memory address register
@@ -16,11 +16,8 @@ $dr    8-bit memory data register
 $ir    16-bit instruction register
 $ia    8-bit optional instruction argument
 $sp    8-bit Stack register (Or stack pointer)
-$ar1-4 4 8-bit accumulators
 $fr    8-bit CPU status flags register
-
-NOTES:
-$ip and $mr are actually adders connected to D flipflops, where the second operand is 4 bits wide.
+$a0-15 16 8-bit accumulators
 
 Flags register: [  .  .  .  .  O  N  Z  P  ]
 O = Overflowed result
@@ -34,18 +31,18 @@ P = Positive result
 
 OP Code	|  Instruction	|  Description
 -----------------------------------------------------------------------------------------
-0000	|  ADD		|  Add a value to the accumulator
-0001	|  AND		|  AND a value with the accumulator
-0010	|  OR		|  OR a value with the accumulator
-0011	|  XOR		|  XOR a value with the accumulator
-0100	|  NOT		|  NOT the accumulator
-0101	|  SHF		|  SHIFT the accumulator either left or right
-0110	|  LD		|  Load a value from memory into the accumulator
+0000	|  ADD		|  Add a value to the currently selected accumulator
+0001	|  AND		|  AND a value with the currently selected accumulator
+0010	|  OR		|  OR a value with the currently selected accumulator
+0011	|  XOR		|  XOR a value with the currently selected accumulator
+0100	|  NOT		|  NOT the currently selected accumulator
+0101	|  SHF		|  SHIFT the currently selected accumulator either left or right
+0110	|  LD		|  Load a value from memory into the currently selected accumulator
 0111	|  LDI		|  Load a value from memory using an immediate PC offset
-1000	|  ST		|  Store the accumulator to memory
-1001	|  STI		|  Store the accumulator to memory using an immediate PC offset
+1000	|  ST		|  Store the currently selected accumulator to memory
+1001	|  STI		|  Store the currently selected accumulator to memory using an immediate PC offset
 1010	|  STK		|  Stack push/pop
-1011	|  LA		|  Store an immediate address into the MAR or the accumulator
+1011	|  LA		|  Store an immediate address into the MAR or the currently selected accumulator
 1100	|  BR		|  Branch
 1101	|  PRT		|  Port I/O
 1110	|  ASET  	|  Set the current active accumulator
@@ -111,7 +108,7 @@ else
     $ar << count-1
 
 Note that count is offset by 1.
-This means that 00 will correspond to 
+This means that 00 will correspond to
 a shift of 1, 01 to a shift of 2, etc.
 
 
@@ -179,10 +176,10 @@ if pop == 1:
         $ar &= memory[$sp]
 
     else if operation == 110b:
-        $ar |= memory[$sp] 
+        $ar |= memory[$sp]
 
     else if operation == 111b:
-        $ar ^= memory[$sp] 
+        $ar ^= memory[$sp]
 
     else:
         $ar = memory[$sp]
@@ -245,14 +242,3 @@ else
 1110 aID(4)
 
 Set the current active accumulator to accumulator #aID
-
-
-============
- TODO/NOTES
-============
-
-It should be possible for offset based instructions 
-to conditionally load an extra byte dependant on whether 
-any of the last 4 bits of the instruction is non-zero. 
-This is subject to implementation complications, and 
-will be explored in the future.
