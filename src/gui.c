@@ -257,7 +257,7 @@ void printRegister(WINDOW* win, char* name, char* suffix, int value, int size, c
     wprintw(win, " :: ");
     printBinaryString(win, value, size);
     if(mark)
-        wprintw(win, "b *]%s",suffix);
+        wprintw(win, "b <]%s",suffix);
     else
         wprintw(win, "b  ]%s",suffix);
 }
