@@ -8,6 +8,7 @@
  * Status bar moved into its own window
  * Added arithmetic overflow detection
  * Added the ability to read the status register and stack pointer
+ * SHFl/r now supports operands up to 8
 
  V0.9
 ----------

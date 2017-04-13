@@ -226,7 +226,7 @@ void x09() {
     }
     setflags();
 
-    if(imm2--)
+    if(imm3--)
         nextState = &x09;
     else
         nextState = &x00;

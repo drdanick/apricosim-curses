@@ -100,7 +100,7 @@ $ar = !$ar
  SHF
 -----
 
-0101 direction(1) x count(2)
+0101 direction(1) count(3)
 
 if direction == 1:
     $ar >> count-1
