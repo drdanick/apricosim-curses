@@ -20,7 +20,7 @@ $fr    8-bit CPU status flags register
 $a0-15 16 8-bit accumulators
 
 Flags register: [  .  .  .  .  O  N  Z  P  ]
-O = Overflowed result
+O = Result overflowed
 N = Negative result
 Z = Zero result
 P = Positive result

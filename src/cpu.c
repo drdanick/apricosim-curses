@@ -171,7 +171,7 @@ void x03() {
 void x04() {
     currentState = 0x04;
     /* NOTE: On real hardware, the ALU has a specific output for overflows */
-    overflow = ((int)accumulator[amux] + (int)imm4) & 0xFF00;
+    overflow = ((int)accumulator[amux] + (int)imm4) & 0x0100;
 
     accumulator[amux] += imm4;
     setflags();
@@ -221,7 +221,7 @@ void x09() {
         overflow = 0;
         accumulator[amux] >>= 1;
     } else {
-        overflow = ((int)accumulator[amux] << 1) & 0xFF00;
+        overflow = ((int)accumulator[amux] << 1) & 0x0100;
         accumulator[amux] <<= 1;
     }
     setflags();
@@ -359,7 +359,7 @@ void x1B() {
     if(f2) {
         switch(imm2) {
         case ADD:
-            overflow = ((int)accumulator[amux] + (int)mdr) & 0xFF00;
+            overflow = ((int)accumulator[amux] + (int)mdr) & 0x0100;
             accumulator[amux] += mdr;
             break;
         case AND:

@@ -99,7 +99,7 @@ void (*nextState)();
 
 /* Registers */
 unsigned char  stackpt, flags, mdr, ia;
-unsigned int  overflow;
+unsigned int   overflow;
 unsigned char  accumulator[ACCUMULATOR_COUNT];
 unsigned short ir;   /* Instruction Register */
 unsigned short mar;  /* Memory Address Register */
