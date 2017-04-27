@@ -47,4 +47,8 @@ unsigned int stackdisplay; /* Stack display offset */
 char cyclemode;
 char rdisplaymode;
 
+/* Constants */
+
+#define MAIN_DISPLAY_HORIZONTAL_RATIO 1.6
+
 #endif /* GUI_H */

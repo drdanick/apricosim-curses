@@ -103,7 +103,7 @@ void initDimensions(int maxX, int maxY) {
 
     mx = 0;
     my = rh;
-    mw = (int)(maxX / 1.618f);
+    mw = (int)(maxX / MAIN_DISPLAY_HORIZONTAL_RATIO);
     mh = maxY - my - 2;
 
     sx = mw;
