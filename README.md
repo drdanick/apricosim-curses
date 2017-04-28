@@ -63,8 +63,8 @@ The simulator can be operated with the following controls:
 `p`           Jump to program counter position in memory display.  
 `r`           Toggle between register and CPU status display modes.  
 `b`           Toggle a breakpoint.  
-`m`           Toggle between state execution and instruction execution modes.  
-`space`       Execute one CPU state or instruction.  
+`m`           Toggle between state execution, instruction execution and automatic run modes.  
+`space`       Depending on mode, execute one CPU state/instruction or start automatic execution.  
 `q`           Quit the simulator.  
 `F1`          Interrupt the currently running program and quit the simulator.
 
