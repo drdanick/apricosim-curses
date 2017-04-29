@@ -8,13 +8,15 @@ void initgui();
 void destroygui();
 void initDimensions(int maxX, int maxY);
 void refreshRegisterDisplay();
-void printMemory(WINDOW* win, int y, int x, int address, int value, int is_breakpoint, int is_pointed_to, char* symbol); 
+void printMemory(WINDOW* win, int y, int x, int address, int value, int is_breakpoint, int is_pointed_to, char* symbol);
 void refreshStatusDisplay();
 void refreshMemoryDisplay();
 void refreshStackDisplay();
 void refreshAll();
-void printRegister(WINDOW* win, char* name, char* suffix, int value, int size, char mark);
+void printRegister(WINDOW* win, char* name, char* suffix, int value, int size, char mark, char doubleWordAlignment);
+char* getBinaryString(unsigned int num, unsigned int size);
 void printBinaryString(WINDOW* win, unsigned int num, unsigned int size);
+char* getHexString(unsigned int num, unsigned int size);
 void printHexString(WINDOW* win, unsigned int num, unsigned int size);
 
 

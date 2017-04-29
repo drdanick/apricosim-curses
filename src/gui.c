@@ -121,45 +121,45 @@ void refreshRegisterDisplay() {
     werase(registers);
 
     if(rdisplaymode) {
-        printRegister(registers, "A0", "", accumulator[0], 8, (amux == 0));
-        printRegister(registers, "A8", "\n", accumulator[8], 8, (amux == 8));
+        printRegister(registers, "A0", "", accumulator[0], 8, (amux == 0), 0);
+        printRegister(registers, "A8", "\n", accumulator[8], 8, (amux == 8), 0);
 
-        printRegister(registers, "A1", "", accumulator[1], 8, (amux == 1));
-        printRegister(registers, "A9", "\n", accumulator[9], 8, (amux == 9));
+        printRegister(registers, "A1", "", accumulator[1], 8, (amux == 1), 0);
+        printRegister(registers, "A9", "\n", accumulator[9], 8, (amux == 9), 0);
 
-        printRegister(registers, "A2", "", accumulator[2], 8, (amux == 2));
-        printRegister(registers, "A10", "\n", accumulator[10], 8, (amux == 10));
+        printRegister(registers, "A2", "", accumulator[2], 8, (amux == 2), 0);
+        printRegister(registers, "A10", "\n", accumulator[10], 8, (amux == 10), 0);
 
-        printRegister(registers, "A3", "", accumulator[3], 8, (amux == 3));
-        printRegister(registers, "A11", "\n", accumulator[11], 8, (amux == 11));
+        printRegister(registers, "A3", "", accumulator[3], 8, (amux == 3), 0);
+        printRegister(registers, "A11", "\n", accumulator[11], 8, (amux == 11), 0);
 
-        printRegister(registers, "A4", "", accumulator[4], 8, (amux == 4));
-        printRegister(registers, "A12", "\n", accumulator[12], 8, (amux == 12));
+        printRegister(registers, "A4", "", accumulator[4], 8, (amux == 4), 0);
+        printRegister(registers, "A12", "\n", accumulator[12], 8, (amux == 12), 0);
 
-        printRegister(registers, "A5", "", accumulator[5], 8, (amux == 5));
-        printRegister(registers, "A13", "\n", accumulator[13], 8, (amux == 13));
+        printRegister(registers, "A5", "", accumulator[5], 8, (amux == 5), 0);
+        printRegister(registers, "A13", "\n", accumulator[13], 8, (amux == 13), 0);
 
-        printRegister(registers, "A6", "", accumulator[6], 8, (amux == 6));
-        printRegister(registers, "A14", "\n", accumulator[14], 8, (amux == 14));
+        printRegister(registers, "A6", "", accumulator[6], 8, (amux == 6), 0);
+        printRegister(registers, "A14", "\n", accumulator[14], 8, (amux == 14), 0);
 
-        printRegister(registers, "A7", "", accumulator[7], 8, (amux == 7));
-        printRegister(registers, "A15", "\n", accumulator[15], 8, (amux == 15));
+        printRegister(registers, "A7", "", accumulator[7], 8, (amux == 7), 0);
+        printRegister(registers, "A15", "\n", accumulator[15], 8, (amux == 15), 0);
 
         waddstr(registers, "\n");
-        printRegister(registers, "Program Counter   ", "\n", pc, 16, 0);
+        printRegister(registers, "Program Counter   ", "\n", pc, 16, 0, 1);
 
 
     } else {
-        printRegister(registers, "CPU Flags         ", "\n", flags, 8, 0);
-        printRegister(registers, "MDR               ", "\n", mdr, 8, 0);
-        printRegister(registers, "IA                ", "\n", ia, 8, 0);
-        printRegister(registers, "Stack Pointer     ", "\n", stackpt, 8, 0);
-        printRegister(registers, "IR                ", "\n", ir, 16, 0);
-        printRegister(registers, "MAR               ", "\n", mar, 16, 0);
+        printRegister(registers, "CPU Flags         ", "\n", flags, 8, 0, 1);
+        printRegister(registers, "MDR               ", "\n", mdr, 8, 0, 1);
+        printRegister(registers, "IA                ", "\n", ia, 8, 0, 1);
+        printRegister(registers, "Stack Pointer     ", "\n", stackpt, 8, 0, 1);
+        printRegister(registers, "IR                ", "\n", ir, 16, 0, 1);
+        printRegister(registers, "MAR               ", "\n", mar, 16, 0, 1);
         waddstr(registers, "\n");
         waddstr(registers, "\n");
         waddstr(registers, "\n");
-        printRegister(registers, "Program Counter   ", "\n", pc, 16, 0);
+        printRegister(registers, "Program Counter   ", "\n", pc, 16, 0, 1);
     }
 
     wnoutrefresh(registers);
@@ -251,27 +251,55 @@ void refreshAll() {
     refreshStatusDisplay();
 }
 
-void printRegister(WINDOW* win, char* name, char* suffix, int value, int size, char mark) {
-    wprintw(win, "[%-4s: %-5d :: 0x", name, value);
-    printHexString(win, value, size);
-    wprintw(win, " :: ");
-    printBinaryString(win, value, size);
-    if(mark)
-        wprintw(win, "b <]%s",suffix);
-    else
-        wprintw(win, "b  ]%s",suffix);
+void printRegister(WINDOW* win, char* name, char* suffix, int value, int size, char mark, char doubleWordAlignment) {
+    if(doubleWordAlignment) {
+        wprintw(win, "[%-4s: %-5d :: 0x%-4s :: %16sb %c]%s",
+                name,
+                value,
+                getHexString(value, size),
+                getBinaryString(value, size),
+                mark ? '<' : ' ',
+                suffix);
+    } else {
+        wprintw(win, "[%-4s: %-3d :: 0x%-2s :: %8sb %c]%s",
+                name,
+                value,
+                getHexString(value, size),
+                getBinaryString(value, size),
+                mark ? '<' : ' ',
+                suffix);
+    }
+}
+
+char* getBinaryString(unsigned int num, unsigned int size) {
+    static char buffer[64]; /* Don't bother defining a constant for this size. The size should never change. */
+    char* bufferptr = buffer;
+
+    while(size > 0) {
+        *bufferptr++ = (num >> --size) & 0x01 ? '1' : '0';
+    }
+    *bufferptr = '\0';
+
+    return buffer;
 }
 
 void printBinaryString(WINDOW* win, unsigned int num, unsigned int size) {
+    wprintw(win, "%s", getBinaryString(num, size));
+}
+
+char* getHexString(unsigned int num, unsigned int size) {
+    static char buffer[16]; /* Don't bother defining a constant for this size. The size should never change. */
+    char* bufferptr = buffer;
+
     while(size > 0) {
-        waddch(win, (num >> --size) & 0x01 ? '1' : '0');
+        *bufferptr++ = HEX[(num >> (size - 4)) & 0x0F];
+        size -= 4;
     }
+    *bufferptr = '\0';
+
+    return buffer;
 }
 
 void printHexString(WINDOW* win, unsigned int num, unsigned int size) {
-    while(size > 0) {
-        waddch(win, HEX[(num >> (size - 4)) & 0x0F]);
-
-        size -= 4;
-    }
+    wprintw(win, "%s", getHexString(num, size));
 }
