@@ -184,10 +184,20 @@ void printMemory(WINDOW* win, int y, int x, int address, int value, int is_break
     }
 }
 
+void clearStatusDisplay() {
+    int i = 0;
+    wmove(info, 0, 0);
+    for(; i < iw - 2; i++) {
+        wprintw(info, " ");
+    }
+
+}
+
 void refreshStatusDisplay() {
+    clearStatusDisplay();
     mvwaddstr(info, 0,4, "Current state: 0x");
     printHexString(info, currentState, 8);
-    wprintw(info, "  Instructions executed: %d  Cycles Executed: %d  Cycle Mode: %s",instructionCount, cycleCount,cyclemode ? ((cyclemode == 1) ? "I MODE" : "R MODE") : "S MODE");
+    wprintw(info, "  Instructions executed: %d  Cycles Executed: %d  Cycle Mode: %s",instructionCount, cycleCount,cyclemode ? ((cyclemode == 1) ? "INSTRUCTION" : "RUN") : "STATE");
 
     mvhline(iy, 0, 0, iw);
     mvvline(iy, 0, 0, 1);
