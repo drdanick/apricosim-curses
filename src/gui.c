@@ -30,6 +30,7 @@ void initgui() {
         rdisplaymode = 1;
     }
 
+    curs_set(0);
     nonl();
     nodelay(stdscr, TRUE);
     keypad(stdscr, TRUE);
