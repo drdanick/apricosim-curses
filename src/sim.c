@@ -196,7 +196,7 @@ void mainloop() {
     }
 }
 
-void main(int argc, char** argv) {
+int main(int argc, char** argv) {
     int temp = 0;
     int i;
 
@@ -232,4 +232,6 @@ void main(int argc, char** argv) {
     mainloop();
 
     finish(0);
+
+    return 0;
 }
