@@ -147,20 +147,20 @@ void refreshRegisterDisplay() {
         printRegister(registers, "A15", "\n", accumulator[15], 8, (amux == 15), 0);
 
         waddstr(registers, "\n");
-        printRegister(registers, "Program Counter   ", "\n", pc, 16, 0, 1);
+        printRegister(registers, "Program Counter ", "\n", pc, 16, 0, 1);
 
 
     } else {
-        printRegister(registers, "CPU Flags         ", "\n", flags, 8, 0, 1);
-        printRegister(registers, "MDR               ", "\n", mdr, 8, 0, 1);
-        printRegister(registers, "IA                ", "\n", ia, 8, 0, 1);
-        printRegister(registers, "Stack Pointer     ", "\n", stackpt, 8, 0, 1);
-        printRegister(registers, "IR                ", "\n", ir, 16, 0, 1);
-        printRegister(registers, "MAR               ", "\n", mar, 16, 0, 1);
+        printRegister(registers, "CPU Flags       ", "\n", flags, 8, 0, 1);
+        printRegister(registers, "MDR             ", "\n", mdr, 8, 0, 1);
+        printRegister(registers, "IA              ", "\n", ia, 8, 0, 1);
+        printRegister(registers, "Stack Pointer   ", "\n", stackpt, 8, 0, 1);
+        printRegister(registers, "IR              ", "\n", ir, 16, 0, 1);
+        printRegister(registers, "MAR             ", "\n", mar, 16, 0, 1);
         waddstr(registers, "\n");
         waddstr(registers, "\n");
         waddstr(registers, "\n");
-        printRegister(registers, "Program Counter   ", "\n", pc, 16, 0, 1);
+        printRegister(registers, "Program Counter ", "\n", pc, 16, 0, 1);
     }
 
     wnoutrefresh(registers);
