@@ -51,6 +51,6 @@ char rdisplaymode;
 
 /* Constants */
 
-#define MAIN_DISPLAY_HORIZONTAL_RATIO 1.6
+#define MAIN_DISPLAY_HORIZONTAL_RATIO 1.8
 
 #endif /* GUI_H */
