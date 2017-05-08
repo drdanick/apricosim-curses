@@ -196,9 +196,9 @@ void clearStatusDisplay() {
 
 void refreshStatusDisplay() {
     clearStatusDisplay();
-    mvwaddstr(info, 0,4, "Current state: 0x");
+    mvwaddstr(info, 0,4, "State: 0x");
     printHexString(info, currentState, 8);
-    wprintw(info, "  Instructions executed: %d  Cycles Executed: %d  Cycle Mode: %s",instructionCount, cycleCount,cyclemode ? ((cyclemode == 1) ? "INSTRUCTION" : "RUN") : "STATE");
+    wprintw(info, "  Instruction Count: %d  Cycle Count: %d  Cycle Mode: %s",instructionCount, cycleCount,cyclemode ? ((cyclemode == 1) ? "INSTRUCTION" : "RUN") : "STATE");
 
     mvhline(iy, 0, 0, iw);
     mvvline(iy, 0, 0, 1);
