@@ -81,6 +81,11 @@ void mainloop() {
     char docycle = 0;
     char running = 0; /* Needed so we can do a full GUI refresh if we break out of a run */
     int c;
+    MEVENT event;
+
+    /* Set up curses for mouse handling (only tested in xterm) */
+    mousemask(BUTTON4_PRESSED|BUTTON5_PRESSED, NULL);
+    mouseinterval(0); /* Apparently fixes some bugs in some terminals */
 
     for(;;) {
         if(c = getch(), c == ERR && !docycle) {
@@ -91,47 +96,38 @@ void mainloop() {
 
         switch(c) {
             /* This should be a switch-case block. if-elseif blocks probably won't generate optimal assembly */
+            case KEY_MOUSE:
+                if(getmouse(&event) == OK) {
+                    /* TODO: Scroll stack or memory depending on what the mouse is hovering over */
+                    if (event.bstate & BUTTON4_PRESSED) {
+                        if(event.bstate & BUTTON_SHIFT) {
+                            scrollStackDisplayUp();
+                        } else {
+                            scrollMemoryDisplayUp();
+                        }
+                    } else if (event.bstate & BUTTON5_PRESSED) {
+                        if(event.bstate & BUTTON_SHIFT) {
+                            scrollStackDisplayDown();
+                        } else {
+                            scrollMemoryDisplayDown();
+                        }
+                    }
+                }
+                break;
             case ' ':
                 docycle = !docycle;
                 break;
             case 'j':
-                if(memdisplay < 65535) {
-                    memdisplay++;
-                    scroll(mainmem);
-                    if(memdisplay < 65536 - (mh - 3))
-                        printMemory(mainmem, mh-3, 0, memdisplay + (mh - 3), memory[memdisplay + (mh - 3)], breakpoints[memdisplay + (mh - 3)], pc == (memdisplay + (mh - 3)), symbols[memdisplay + (mh - 3)]);
-                    else
-                        mvwaddch(mainmem, mh - 3, 0, '~');
-                    wnoutrefresh(mainmem);
-                }
+                scrollMemoryDisplayDown();
                 break;
             case 'k':
-                if(memdisplay > 0) {
-                    memdisplay--;
-                    wscrl(mainmem, -1);
-                    printMemory(mainmem, 0, 0, memdisplay, memory[memdisplay], breakpoints[memdisplay], pc == memdisplay, symbols[memdisplay]);
-                    wnoutrefresh(mainmem);
-                }
+                scrollMemoryDisplayUp();
                 break;
             case 'J':
-                if(stackdisplay < 255) {
-                    stackdisplay++;
-                    scroll(stack);
-                    if(stackdisplay < 256 - (sh -3))
-                        printMemory(stack, sh-3, 0, stackdisplay + (sh - 3), stackmem[stackdisplay + (sh - 3)], 0, stackpt == (stackdisplay + (sh - 3)), NULL);
-                    else
-                        mvwaddch(stack, sh - 3, 0, '~');
-                    wnoutrefresh(stack);
-                }
+                scrollStackDisplayDown();
                 break;
             case 'K':
-                if(stackdisplay > 0) {
-                    stackdisplay--;
-                    wscrl(stack, -1);
-                    printMemory(stack, 0, 0, stackdisplay, stackmem[stackdisplay], 0, stackpt == stackdisplay, NULL);
-
-                    wnoutrefresh(stack);
-                }
+                scrollStackDisplayUp();
                 break;
             case KEY_NPAGE: /* page down */
                 memdisplay += 0x0100;
