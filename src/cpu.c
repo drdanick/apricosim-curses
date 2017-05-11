@@ -210,9 +210,9 @@ void x08() {
     nextState = &x00;
 }
 
-/* NOTE: 
- * This state does not reflect the hardware implementation of a shift 
- * in Apricos, but it does reflect the approximate number of states that 
+/* NOTE:
+ * This state does not reflect the hardware implementation of a shift
+ * in Apricos, but it does reflect the approximate number of states that
  * will be required for a shift.
  */
 void x09() {
