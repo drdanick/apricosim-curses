@@ -13,6 +13,8 @@ void refreshStatusDisplay();
 void refreshMemoryDisplay();
 void refreshStackDisplay();
 void refreshAll();
+void scrollSelectedDisplayUp(int mouseY, int mouseX);
+void scrollSelectedDisplayDown(int mouseY, int mouseX);
 void scrollMemoryDisplayUp();
 void scrollMemoryDisplayDown();
 void scrollStackDisplayUp();

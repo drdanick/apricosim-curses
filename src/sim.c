@@ -84,7 +84,7 @@ void mainloop() {
     MEVENT event;
 
     /* Set up curses for mouse handling (only tested in xterm) */
-    mousemask(BUTTON4_PRESSED|BUTTON5_PRESSED, NULL);
+    mousemask(BUTTON4_PRESSED|BUTTON5_PRESSED|REPORT_MOUSE_POSITION, NULL);
     mouseinterval(0); /* Apparently fixes some bugs in some terminals */
 
     for(;;) {
@@ -95,22 +95,12 @@ void mainloop() {
         }
 
         switch(c) {
-            /* This should be a switch-case block. if-elseif blocks probably won't generate optimal assembly */
             case KEY_MOUSE:
                 if(getmouse(&event) == OK) {
-                    /* TODO: Scroll stack or memory depending on what the mouse is hovering over */
                     if (event.bstate & BUTTON4_PRESSED) {
-                        if(event.bstate & BUTTON_SHIFT) {
-                            scrollStackDisplayUp();
-                        } else {
-                            scrollMemoryDisplayUp();
-                        }
+                        scrollSelectedDisplayUp(event.y, event.x);
                     } else if (event.bstate & BUTTON5_PRESSED) {
-                        if(event.bstate & BUTTON_SHIFT) {
-                            scrollStackDisplayDown();
-                        } else {
-                            scrollMemoryDisplayDown();
-                        }
+                        scrollSelectedDisplayDown(event.y, event.x);
                     }
                 }
                 break;

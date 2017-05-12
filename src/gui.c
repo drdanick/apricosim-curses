@@ -262,6 +262,22 @@ void refreshAll() {
     refreshStatusDisplay();
 }
 
+void scrollSelectedDisplayUp(int mouseY, int mouseX) {
+    if(wenclose(stack_b, mouseY, mouseX)) {
+        scrollStackDisplayUp();
+    } else {
+        scrollMemoryDisplayUp();
+    }
+}
+
+void scrollSelectedDisplayDown(int mouseY, int mouseX) {
+    if(wenclose(stack_b, mouseY, mouseX)) {
+        scrollStackDisplayDown();
+    } else {
+        scrollMemoryDisplayDown();
+    }
+}
+
 void scrollMemoryDisplayUp(){
     if(memdisplay > 0) {
         memdisplay--;
