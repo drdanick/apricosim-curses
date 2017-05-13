@@ -84,7 +84,7 @@ void mainloop() {
     MEVENT event;
 
     /* Set up curses for mouse handling (only tested in xterm) */
-    mousemask(BUTTON4_PRESSED|BUTTON5_PRESSED|REPORT_MOUSE_POSITION, NULL);
+    mousemask(BUTTON1_PRESSED|BUTTON4_PRESSED|BUTTON5_PRESSED|REPORT_MOUSE_POSITION, NULL);
     mouseinterval(0); /* Apparently fixes some bugs in some terminals */
 
     for(;;) {
@@ -97,9 +97,11 @@ void mainloop() {
         switch(c) {
             case KEY_MOUSE:
                 if(getmouse(&event) == OK) {
-                    if (event.bstate & BUTTON4_PRESSED) {
+                    if(event.bstate & BUTTON1_PRESSED) { /* Left click */
+                        handleLeftClick(event.y, event.x);
+                    } else if (event.bstate & BUTTON4_PRESSED) { /* Scroll up */
                         scrollSelectedDisplayUp(event.y, event.x);
-                    } else if (event.bstate & BUTTON5_PRESSED) {
+                    } else if (event.bstate & BUTTON5_PRESSED) { /* Scroll down */
                         scrollSelectedDisplayDown(event.y, event.x);
                     }
                 }

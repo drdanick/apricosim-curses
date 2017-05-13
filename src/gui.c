@@ -262,6 +262,13 @@ void refreshAll() {
     refreshStatusDisplay();
 }
 
+void handleLeftClick(int mouseY, int mouseX) {
+    if(wmouse_trafo(mainmem, &mouseY, &mouseX, 0) && memdisplay + mouseY < 65536) {
+        breakpoints[memdisplay + mouseY] = (breakpoints[memdisplay + mouseY] + 1) & 0x01;
+        refreshMemoryDisplay();
+    }
+}
+
 void scrollSelectedDisplayUp(int mouseY, int mouseX) {
     if(wenclose(stack_b, mouseY, mouseX)) {
         scrollStackDisplayUp();
