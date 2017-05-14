@@ -14,12 +14,12 @@ void refreshMemoryDisplay();
 void refreshStackDisplay();
 void refreshAll();
 void handleLeftClick(int mouseY, int mouseX);
-void scrollSelectedDisplayUp(int mouseY, int mouseX);
-void scrollSelectedDisplayDown(int mouseY, int mouseX);
-void scrollMemoryDisplayUp();
-void scrollMemoryDisplayDown();
-void scrollStackDisplayUp();
-void scrollStackDisplayDown();
+void scrollSelectedDisplayUp(int mouseY, int mouseX, int lines);
+void scrollSelectedDisplayDown(int mouseY, int mouseX, int lines);
+void scrollMemoryDisplayUp(int lines);
+void scrollMemoryDisplayDown(int lines);
+void scrollStackDisplayUp(int lines);
+void scrollStackDisplayDown(int lines);
 void printRegister(WINDOW* win, char* name, char* suffix, int value, int size, char mark, char doubleWordAlignment);
 char* getBinaryString(unsigned int num, unsigned int size);
 void printBinaryString(WINDOW* win, unsigned int num, unsigned int size);
@@ -50,8 +50,8 @@ WINDOW *info;
 
 int rx, ry, rw, rh, mx, my, mw, mh, sx, sy, sw, sh, ix, iy, iw, ih; /* GUI dimensions and coordinates */
 
-unsigned int memdisplay; /* Memory display offset */
-unsigned int stackdisplay; /* Stack display offset */
+int memdisplay; /* Memory display offset */
+int stackdisplay; /* Stack display offset */
 
 char cyclemode;
 char rdisplaymode;

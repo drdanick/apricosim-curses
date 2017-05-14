@@ -269,63 +269,80 @@ void handleLeftClick(int mouseY, int mouseX) {
     }
 }
 
-void scrollSelectedDisplayUp(int mouseY, int mouseX) {
+void scrollSelectedDisplayUp(int mouseY, int mouseX, int lines) {
     if(wenclose(stack_b, mouseY, mouseX)) {
-        scrollStackDisplayUp();
+        scrollStackDisplayUp(lines);
     } else {
-        scrollMemoryDisplayUp();
+        scrollMemoryDisplayUp(lines);
     }
 }
 
-void scrollSelectedDisplayDown(int mouseY, int mouseX) {
+void scrollSelectedDisplayDown(int mouseY, int mouseX, int lines) {
     if(wenclose(stack_b, mouseY, mouseX)) {
-        scrollStackDisplayDown();
+        scrollStackDisplayDown(lines);
     } else {
-        scrollMemoryDisplayDown();
+        scrollMemoryDisplayDown(lines);
     }
 }
 
-void scrollMemoryDisplayUp(){
-    if(memdisplay > 0) {
-        memdisplay--;
-        wscrl(mainmem, -1);
-        printMemory(mainmem, 0, 0, memdisplay, memory[memdisplay], breakpoints[memdisplay], pc == memdisplay, symbols[memdisplay]);
-        wnoutrefresh(mainmem);
-    }
+void scrollMemoryDisplayUp(int lines){
+    int oldmemdisplay = memdisplay;
+    int i;
+    memdisplay -= lines;
+    if(memdisplay < 0)
+        memdisplay = 0;
+
+    wscrl(mainmem, memdisplay - oldmemdisplay);
+    for(i = oldmemdisplay; i >= memdisplay; i--)
+        printMemory(mainmem, i - memdisplay, 0, i, memory[i], breakpoints[i], pc == i, symbols[i]);
+    wnoutrefresh(mainmem);
 }
 
-void scrollMemoryDisplayDown(){
-    if(memdisplay < 65535) {
-        memdisplay++;
-        scroll(mainmem);
-        if(memdisplay < 65536 - (mh - 3))
-            printMemory(mainmem, mh-3, 0, memdisplay + (mh - 3), memory[memdisplay + (mh - 3)], breakpoints[memdisplay + (mh - 3)], pc == (memdisplay + (mh - 3)), symbols[memdisplay + (mh - 3)]);
+void scrollMemoryDisplayDown(int lines){
+    int oldmemdisplay = memdisplay;
+    int i;
+    memdisplay += lines;
+    if(memdisplay > 65535)
+        memdisplay = 65535;
+
+    wscrl(mainmem, memdisplay - oldmemdisplay);
+    for(i = oldmemdisplay; i <= memdisplay; i++) {
+        if(i < 65536 - (mh - 3))
+            printMemory(mainmem, mh - 3 - lines--, 0, i + (mh - 3), memory[i + (mh - 3)], breakpoints[i + (mh - 3)], pc == (i + (mh - 3)), symbols[i + (mh - 3)]);
         else
-            mvwaddch(mainmem, mh - 3, 0, '~');
-        wnoutrefresh(mainmem);
+            mvwaddch(mainmem, mh - 3 - lines--, 0, '~');
     }
+    wnoutrefresh(mainmem);
 }
 
-void scrollStackDisplayUp(){
-    if(stackdisplay > 0) {
-        stackdisplay--;
-        wscrl(stack, -1);
-        printMemory(stack, 0, 0, stackdisplay, stackmem[stackdisplay], 0, stackpt == stackdisplay, NULL);
+void scrollStackDisplayUp(int lines){
+    int oldstackdisplay = stackdisplay;
+    int i;
+    stackdisplay -= lines;
+    if(stackdisplay < 0)
+        stackdisplay = 0;
 
-        wnoutrefresh(stack);
-    }
+    wscrl(stack, stackdisplay - oldstackdisplay);
+    for(i = oldstackdisplay; i >= stackdisplay; i--)
+        printMemory(stack, i - stackdisplay, 0, i, stackmem[i], 0, stackpt == i, NULL);
+    wnoutrefresh(stack);
 }
 
-void scrollStackDisplayDown(){
-    if(stackdisplay < 255) {
-        stackdisplay++;
-        scroll(stack);
-        if(stackdisplay < 256 - (sh -3))
-            printMemory(stack, sh-3, 0, stackdisplay + (sh - 3), stackmem[stackdisplay + (sh - 3)], 0, stackpt == (stackdisplay + (sh - 3)), NULL);
+void scrollStackDisplayDown(int lines){
+    int oldstackdisplay = stackdisplay;
+    int i;
+    stackdisplay += lines;
+    if(stackdisplay > 255)
+        stackdisplay = 255;
+
+    wscrl(stack, stackdisplay - oldstackdisplay);
+    for(i = oldstackdisplay; i <= stackdisplay; i++) {
+        if(i < 256 - (sh - 3))
+            printMemory(stack, sh - 3 - lines--, 0, i + (sh - 3), stackmem[i + (sh - 3)], 0, stackpt == (i + (sh - 3)), NULL);
         else
-            mvwaddch(stack, sh - 3, 0, '~');
-        wnoutrefresh(stack);
+            mvwaddch(stack, sh - 3 - lines--, 0, '~');
     }
+    wnoutrefresh(stack);
 }
 
 void printRegister(WINDOW* win, char* name, char* suffix, int value, int size, char mark, char doubleWordAlignment) {

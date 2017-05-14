@@ -1,3 +1,4 @@
+#include "aprsim.h"
 #include "argparser.h"
 #include "cpu.h"
 #include "gui.h"
@@ -100,9 +101,11 @@ void mainloop() {
                     if(event.bstate & BUTTON1_PRESSED) { /* Left click */
                         handleLeftClick(event.y, event.x);
                     } else if (event.bstate & BUTTON4_PRESSED) { /* Scroll up */
-                        scrollSelectedDisplayUp(event.y, event.x);
+                        scrollSelectedDisplayUp(event.y, event.x,
+                                (event.bstate & BUTTON_SHIFT) ? MOUSE_SCROLL_LINES * 2 : MOUSE_SCROLL_LINES);
                     } else if (event.bstate & BUTTON5_PRESSED) { /* Scroll down */
-                        scrollSelectedDisplayDown(event.y, event.x);
+                        scrollSelectedDisplayDown(event.y, event.x,
+                                (event.bstate & BUTTON_SHIFT) ? MOUSE_SCROLL_LINES * 2 : MOUSE_SCROLL_LINES);
                     }
                 }
                 break;
@@ -110,16 +113,16 @@ void mainloop() {
                 docycle = !docycle;
                 break;
             case 'j':
-                scrollMemoryDisplayDown();
+                scrollMemoryDisplayDown(1);
                 break;
             case 'k':
-                scrollMemoryDisplayUp();
+                scrollMemoryDisplayUp(1);
                 break;
             case 'J':
-                scrollStackDisplayDown();
+                scrollStackDisplayDown(1);
                 break;
             case 'K':
-                scrollStackDisplayUp();
+                scrollStackDisplayUp(1);
                 break;
             case KEY_NPAGE: /* page down */
                 memdisplay += 0x0100;

@@ -5,4 +5,6 @@
 #define VERSION "UNKNOWN"
 #endif
 
+#define MOUSE_SCROLL_LINES 3
+
 #endif /* APRSIM_H */
