@@ -1,6 +1,7 @@
 #include "gui.h"
 #include "cpu.h"
 #include "signal.h"
+#include "aprsim.h"
 
 /* TODO: This code is a hack job, and needs a rewrite */
 
@@ -68,6 +69,7 @@ void initgui() {
     box(mainmem_b,0,0);
     box(stack_b,0,0);
     box(info_b,0,0);
+    mvwprintw(registers_b, 0, rw - sizeof(PROGRAM_VERSION_STRING) - 3, " " PROGRAM_VERSION_STRING " ");
     mvwprintw(registers_b, 0, 2, " Registers ");
     mvwprintw(stack_b, 0, 2, " Stack ");
     mvwprintw(mainmem_b, 0, 2, " Memory ");

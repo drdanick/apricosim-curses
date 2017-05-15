@@ -8,7 +8,7 @@
 void printHelp() {
     int i = 0;
     struct option coption;
-    printf("Aprsim usage:\n");
+    printf("%s usage:\n", PROGRAM_NAME);
 #ifdef TTY_EMU
     printf("\taprsim [options] [-f file | -u file] [-s file] [binfiles...]\n");
 #else
@@ -41,7 +41,7 @@ Settings getSettingsFromArgs(int argc, char** argv) {
 #endif /* TTY_EMU */
         switch(c) {
             case 'v':
-                printf("Aprsim V%s\n", VERSION);
+                printf("%s\n", PROGRAM_VERSION_STRING);
                 exit(EXIT_SUCCESS);
                 break;
             case 'h':
