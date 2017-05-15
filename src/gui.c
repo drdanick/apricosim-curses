@@ -289,28 +289,37 @@ void scrollMemoryDisplayUp(int lines){
     int oldmemdisplay = memdisplay;
     int i;
     memdisplay -= lines;
+
     if(memdisplay < 0)
         memdisplay = 0;
 
+    /* Scroll */
     wscrl(mainmem, memdisplay - oldmemdisplay);
-    for(i = oldmemdisplay; i >= memdisplay; i--)
+
+    /* Draw new lines */
+    for(i = oldmemdisplay - 1; i >= memdisplay; i--)
         printMemory(mainmem, i - memdisplay, 0, i, memory[i], breakpoints[i], pc == i, symbols[i]);
     wnoutrefresh(mainmem);
 }
 
 void scrollMemoryDisplayDown(int lines){
     int oldmemdisplay = memdisplay;
+    int drawOffset = mh - 3;
     int i;
+
     memdisplay += lines;
     if(memdisplay > 65535)
         memdisplay = 65535;
 
+    /* Scroll */
     wscrl(mainmem, memdisplay - oldmemdisplay);
+
+    /* Draw new lines */
     for(i = oldmemdisplay; i <= memdisplay; i++) {
-        if(i < 65536 - (mh - 3))
-            printMemory(mainmem, mh - 3 - lines--, 0, i + (mh - 3), memory[i + (mh - 3)], breakpoints[i + (mh - 3)], pc == (i + (mh - 3)), symbols[i + (mh - 3)]);
+        if(i < (65536 - drawOffset))
+            printMemory(mainmem, drawOffset - lines--, 0, i + drawOffset, memory[i + drawOffset], breakpoints[i + drawOffset], pc == (i + drawOffset), symbols[i + drawOffset]);
         else
-            mvwaddch(mainmem, mh - 3 - lines--, 0, '~');
+            mvwaddch(mainmem, drawOffset - lines--, 0, '~');
     }
     wnoutrefresh(mainmem);
 }
@@ -318,29 +327,38 @@ void scrollMemoryDisplayDown(int lines){
 void scrollStackDisplayUp(int lines){
     int oldstackdisplay = stackdisplay;
     int i;
+
     stackdisplay -= lines;
     if(stackdisplay < 0)
         stackdisplay = 0;
 
+    /* Scroll */
     wscrl(stack, stackdisplay - oldstackdisplay);
-    for(i = oldstackdisplay; i >= stackdisplay; i--)
+
+    /* Draw new lines */
+    for(i = oldstackdisplay - 1; i >= stackdisplay; i--)
         printMemory(stack, i - stackdisplay, 0, i, stackmem[i], 0, stackpt == i, NULL);
     wnoutrefresh(stack);
 }
 
-void scrollStackDisplayDown(int lines){
+void scrollStackDisplayDown(int lines) {
     int oldstackdisplay = stackdisplay;
+    int drawOffset = sh - 3;
     int i;
+
     stackdisplay += lines;
     if(stackdisplay > 255)
         stackdisplay = 255;
 
+    /* Scroll */
     wscrl(stack, stackdisplay - oldstackdisplay);
+
+    /* Draw new lines */
     for(i = oldstackdisplay; i <= stackdisplay; i++) {
-        if(i < 256 - (sh - 3))
-            printMemory(stack, sh - 3 - lines--, 0, i + (sh - 3), stackmem[i + (sh - 3)], 0, stackpt == (i + (sh - 3)), NULL);
+        if(i < (256 - drawOffset))
+            printMemory(stack, drawOffset - lines--, 0, i + drawOffset, stackmem[i + drawOffset], 0, stackpt == (i + drawOffset), NULL);
         else
-            mvwaddch(stack, sh - 3 - lines--, 0, '~');
+            mvwaddch(stack, drawOffset - lines--, 0, '~');
     }
     wnoutrefresh(stack);
 }
