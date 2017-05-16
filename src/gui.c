@@ -168,16 +168,16 @@ void refreshRegisterDisplay() {
     wnoutrefresh(registers);
 }
 
-void printMemory(WINDOW* win, int y, int x, int address, int value, int is_breakpoint, int is_pointed_to, char* symbol) {
+void printMemory(WINDOW* win, int y, int x, int address, int addressSize, int value, int is_breakpoint, int is_pointed_to, char* symbol) {
     wmove(win, y, x);
 
     waddstr(win, is_pointed_to ? ">" : " ");
     waddstr(win, is_breakpoint ? "   @0x" : "    0x");
 
-    printHexString(win, address, 16);
-    wprintw(win, ":\t");
+    printHexString(win, address, addressSize);
+    wprintw(win, ":    ");
     printHexString(win, value, 8);
-    wprintw(win, "\t");
+    wprintw(win, "     ");
 
     printBinaryString(win, value, 8);
 
@@ -198,9 +198,9 @@ void clearStatusDisplay() {
 
 void refreshStatusDisplay() {
     clearStatusDisplay();
-    mvwaddstr(info, 0,4, "State: 0x");
+    mvwaddstr(info, 0,3, "State: 0x");
     printHexString(info, currentState, 8);
-    wprintw(info, "  Instruction Count: %d  Cycle Count: %d  Cycle Mode: %s",instructionCount, cycleCount,cyclemode ? ((cyclemode == 1) ? "INSTRUCTION" : "RUN") : "STATE");
+    wprintw(info, "  Instruction Count: %d  Cycle Count: %d  Mode: %s",instructionCount, cycleCount,cyclemode ? ((cyclemode == 1) ? "INSTRUCTION" : "RUN") : "STATE");
 
     mvhline(iy, 0, 0, iw);
     mvvline(iy, 0, 0, 1);
@@ -220,6 +220,7 @@ void refreshMemoryDisplay() {
                     i,
                     0,
                     i + memdisplay,
+                    16,
                     memory[memdisplay + i],
                     breakpoints[memdisplay + i],
                     pc == (memdisplay + i),
@@ -244,6 +245,7 @@ void refreshStackDisplay() {
                     i,
                     0,
                     i + stackdisplay,
+                    8,
                     stackmem[stackdisplay + i],
                     0,
                     stackpt == (stackdisplay + i),
@@ -300,7 +302,7 @@ void scrollMemoryDisplayUp(int lines){
 
     /* Draw new lines */
     for(i = oldmemdisplay - 1; i >= memdisplay; i--)
-        printMemory(mainmem, i - memdisplay, 0, i, memory[i], breakpoints[i], pc == i, symbols[i]);
+        printMemory(mainmem, i - memdisplay, 0, i, 16, memory[i], breakpoints[i], pc == i, symbols[i]);
     wnoutrefresh(mainmem);
 }
 
@@ -308,20 +310,22 @@ void scrollMemoryDisplayDown(int lines){
     int oldmemdisplay = memdisplay;
     int drawOffset = mh - 3;
     int i;
+    int actualLines;
 
     memdisplay += lines;
     if(memdisplay > 65535)
         memdisplay = 65535;
+    actualLines = memdisplay - oldmemdisplay;
 
     /* Scroll */
-    wscrl(mainmem, memdisplay - oldmemdisplay);
+    wscrl(mainmem, actualLines);
 
     /* Draw new lines */
     for(i = oldmemdisplay; i <= memdisplay; i++) {
         if(i < (65536 - drawOffset))
-            printMemory(mainmem, drawOffset - lines--, 0, i + drawOffset, memory[i + drawOffset], breakpoints[i + drawOffset], pc == (i + drawOffset), symbols[i + drawOffset]);
+            printMemory(mainmem, drawOffset - actualLines--, 0, i + drawOffset, 16, memory[i + drawOffset], breakpoints[i + drawOffset], pc == (i + drawOffset), symbols[i + drawOffset]);
         else
-            mvwaddch(mainmem, drawOffset - lines--, 0, '~');
+            mvwaddch(mainmem, drawOffset - actualLines--, 0, '~');
     }
     wnoutrefresh(mainmem);
 }
@@ -339,28 +343,30 @@ void scrollStackDisplayUp(int lines){
 
     /* Draw new lines */
     for(i = oldstackdisplay - 1; i >= stackdisplay; i--)
-        printMemory(stack, i - stackdisplay, 0, i, stackmem[i], 0, stackpt == i, NULL);
+        printMemory(stack, i - stackdisplay, 0, i, 8, stackmem[i], 0, stackpt == i, NULL);
     wnoutrefresh(stack);
 }
 
 void scrollStackDisplayDown(int lines) {
     int oldstackdisplay = stackdisplay;
     int drawOffset = sh - 3;
+    int actualLines;
     int i;
 
     stackdisplay += lines;
     if(stackdisplay > 255)
         stackdisplay = 255;
+    actualLines = stackdisplay - oldstackdisplay;
 
     /* Scroll */
-    wscrl(stack, stackdisplay - oldstackdisplay);
+    wscrl(stack, actualLines);
 
     /* Draw new lines */
     for(i = oldstackdisplay; i <= stackdisplay; i++) {
         if(i < (256 - drawOffset))
-            printMemory(stack, drawOffset - lines--, 0, i + drawOffset, stackmem[i + drawOffset], 0, stackpt == (i + drawOffset), NULL);
+            printMemory(stack, drawOffset - actualLines--, 0, i + drawOffset, 8, stackmem[i + drawOffset], 0, stackpt == (i + drawOffset), NULL);
         else
-            mvwaddch(stack, drawOffset - lines--, 0, '~');
+            mvwaddch(stack, drawOffset - actualLines--, 0, '~');
     }
     wnoutrefresh(stack);
 }
