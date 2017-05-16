@@ -7,6 +7,9 @@
 void initgui();
 void destroygui();
 void initDimensions(int maxX, int maxY);
+void initRegisterPageLayout();
+void displayNextRegisterPage();
+void displayPreviousRegisterPage();
 void refreshRegisterDisplay();
 void printMemory(WINDOW* win, int y, int x, int address, int addressSize, int value, int is_breakpoint, int is_pointed_to, char* symbol);
 void refreshStatusDisplay();
@@ -53,11 +56,16 @@ int rx, ry, rw, rh, mx, my, mw, mh, sx, sy, sw, sh, ix, iy, iw, ih; /* GUI dimen
 int memdisplay; /* Memory display offset */
 int stackdisplay; /* Stack display offset */
 
-char cyclemode;
-char rdisplaymode;
+unsigned char cyclemode;
+unsigned char numberOfRegisterPages;
+unsigned char registerDisplayLayout;
+char registerPage;
 
 /* Constants */
 
 #define MAIN_DISPLAY_HORIZONTAL_RATIO 1.8
+#define ALTERNATE_LAYOUT_WINDOW_HEIGHT_THRESHOLD 30
+#define MINIMUM_WINDOW_HEIGHT 20
+#define MINIMUM_WINDOW_WIDTH 75
 
 #endif /* GUI_H */

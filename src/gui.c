@@ -28,7 +28,7 @@ void initgui() {
         initscr();
         winchHandler = &handle_winch;
         signal(SIGWINCH, handle_winch);
-        rdisplaymode = 1;
+        registerPage = 0;
     }
 
     curs_set(0);
@@ -41,6 +41,7 @@ void initgui() {
 
     getmaxyx(stdscr, maxY, maxX);
     initDimensions(maxX, maxY);
+    initRegisterPageLayout();
 
     /* Force main window to update so it is never redrawn */
     refresh();
@@ -99,10 +100,25 @@ void destroygui() {
 }
 
 void initDimensions(int maxX, int maxY) {
+    if(maxY < MINIMUM_WINDOW_HEIGHT) {
+        maxY = MINIMUM_WINDOW_HEIGHT;
+    }
+
+    if(maxX < MINIMUM_WINDOW_WIDTH) {
+        maxX = MINIMUM_WINDOW_WIDTH;
+    }
+
+    if(maxY > ALTERNATE_LAYOUT_WINDOW_HEIGHT_THRESHOLD) {
+        registerDisplayLayout = 0;
+        rh = 12;
+    } else {
+        registerDisplayLayout = 1;
+        rh = 8;
+    }
+
     rx = 0;
     ry = 0;
     rw = maxX;
-    rh = 12;
 
     mx = 0;
     my = rh;
@@ -118,51 +134,138 @@ void initDimensions(int maxX, int maxY) {
     iy = my + mh - 1;
     iw = maxX;
     ih = 3;
+
+}
+
+void initRegisterPageLayout() {
+    switch(registerDisplayLayout) {
+        default:
+        case 0:
+            numberOfRegisterPages = 2;
+            break;
+        case 1:
+            numberOfRegisterPages = 4;
+            break;
+    }
+}
+
+void displayNextRegisterPage() {
+    registerPage = (registerPage + 1) % numberOfRegisterPages;
+    refreshRegisterDisplay();
+}
+
+void displayPreviousRegisterPage() {
+    if(--registerPage < 0) registerPage = numberOfRegisterPages - 1;
+    refreshRegisterDisplay();
 }
 
 void refreshRegisterDisplay() {
     werase(registers);
 
-    if(rdisplaymode) {
-        printRegister(registers, "A0", "", accumulator[0], 8, (amux == 0), 0);
-        printRegister(registers, "A8", "\n", accumulator[8], 8, (amux == 8), 0);
+    switch(registerDisplayLayout) {
+        default:
+        case 0:
+            switch(registerPage) {
+                default:
+                case 0:
+                    printRegister(registers, "A0", "", accumulator[0], 8, (amux == 0), 0);
+                    printRegister(registers, "A8", "\n", accumulator[8], 8, (amux == 8), 0);
 
-        printRegister(registers, "A1", "", accumulator[1], 8, (amux == 1), 0);
-        printRegister(registers, "A9", "\n", accumulator[9], 8, (amux == 9), 0);
+                    printRegister(registers, "A1", "", accumulator[1], 8, (amux == 1), 0);
+                    printRegister(registers, "A9", "\n", accumulator[9], 8, (amux == 9), 0);
 
-        printRegister(registers, "A2", "", accumulator[2], 8, (amux == 2), 0);
-        printRegister(registers, "A10", "\n", accumulator[10], 8, (amux == 10), 0);
+                    printRegister(registers, "A2", "", accumulator[2], 8, (amux == 2), 0);
+                    printRegister(registers, "A10", "\n", accumulator[10], 8, (amux == 10), 0);
 
-        printRegister(registers, "A3", "", accumulator[3], 8, (amux == 3), 0);
-        printRegister(registers, "A11", "\n", accumulator[11], 8, (amux == 11), 0);
+                    printRegister(registers, "A3", "", accumulator[3], 8, (amux == 3), 0);
+                    printRegister(registers, "A11", "\n", accumulator[11], 8, (amux == 11), 0);
 
-        printRegister(registers, "A4", "", accumulator[4], 8, (amux == 4), 0);
-        printRegister(registers, "A12", "\n", accumulator[12], 8, (amux == 12), 0);
+                    printRegister(registers, "A4", "", accumulator[4], 8, (amux == 4), 0);
+                    printRegister(registers, "A12", "\n", accumulator[12], 8, (amux == 12), 0);
 
-        printRegister(registers, "A5", "", accumulator[5], 8, (amux == 5), 0);
-        printRegister(registers, "A13", "\n", accumulator[13], 8, (amux == 13), 0);
+                    printRegister(registers, "A5", "", accumulator[5], 8, (amux == 5), 0);
+                    printRegister(registers, "A13", "\n", accumulator[13], 8, (amux == 13), 0);
 
-        printRegister(registers, "A6", "", accumulator[6], 8, (amux == 6), 0);
-        printRegister(registers, "A14", "\n", accumulator[14], 8, (amux == 14), 0);
+                    printRegister(registers, "A6", "", accumulator[6], 8, (amux == 6), 0);
+                    printRegister(registers, "A14", "\n", accumulator[14], 8, (amux == 14), 0);
 
-        printRegister(registers, "A7", "", accumulator[7], 8, (amux == 7), 0);
-        printRegister(registers, "A15", "\n", accumulator[15], 8, (amux == 15), 0);
+                    printRegister(registers, "A7", "", accumulator[7], 8, (amux == 7), 0);
+                    printRegister(registers, "A15", "\n", accumulator[15], 8, (amux == 15), 0);
 
-        waddstr(registers, "\n");
-        printRegister(registers, "Program Counter ", "\n", pc, 16, 0, 1);
+                    waddstr(registers, "\n");
+                    printRegister(registers, "Program Counter ", "\n", pc, 16, 0, 1);
 
 
-    } else {
-        printRegister(registers, "CPU Flags       ", "\n", flags, 8, 0, 1);
-        printRegister(registers, "MDR             ", "\n", mdr, 8, 0, 1);
-        printRegister(registers, "IA              ", "\n", ia, 8, 0, 1);
-        printRegister(registers, "Stack Pointer   ", "\n", stackpt, 8, 0, 1);
-        printRegister(registers, "IR              ", "\n", ir, 16, 0, 1);
-        printRegister(registers, "MAR             ", "\n", mar, 16, 0, 1);
-        waddstr(registers, "\n");
-        waddstr(registers, "\n");
-        waddstr(registers, "\n");
-        printRegister(registers, "Program Counter ", "\n", pc, 16, 0, 1);
+                    break;
+                case 1:
+                    printRegister(registers, "CPU Flags       ", "\n", flags, 8, 0, 1);
+                    printRegister(registers, "MDR             ", "\n", mdr, 8, 0, 1);
+                    printRegister(registers, "IA              ", "\n", ia, 8, 0, 1);
+                    printRegister(registers, "Stack Pointer   ", "\n", stackpt, 8, 0, 1);
+                    printRegister(registers, "IR              ", "\n", ir, 16, 0, 1);
+                    printRegister(registers, "MAR             ", "\n", mar, 16, 0, 1);
+                    waddstr(registers, "\n");
+                    waddstr(registers, "\n");
+                    waddstr(registers, "\n");
+                    printRegister(registers, "Program Counter ", "\n", pc, 16, 0, 1);
+                    break;
+            }
+            break;
+        case 1:
+            switch(registerPage) {
+                default:
+                case 0:
+                    printRegister(registers, "A0", "", accumulator[0], 8, (amux == 0), 0);
+                    printRegister(registers, "A4", "\n", accumulator[4], 8, (amux == 4), 0);
+
+                    printRegister(registers, "A1", "", accumulator[1], 8, (amux == 1), 0);
+                    printRegister(registers, "A5", "\n", accumulator[5], 8, (amux == 5), 0);
+
+                    printRegister(registers, "A2", "", accumulator[2], 8, (amux == 2), 0);
+                    printRegister(registers, "A6", "\n", accumulator[6], 8, (amux == 6), 0);
+
+                    printRegister(registers, "A3", "", accumulator[3], 8, (amux == 3), 0);
+                    printRegister(registers, "A7", "\n", accumulator[7], 8, (amux == 7), 0);
+
+                    waddstr(registers, "\n");
+                    printRegister(registers, "Program Counter ", "\n", pc, 16, 0, 1);
+                    break;
+                case 1:
+                    printRegister(registers, "A8", "", accumulator[8], 8, (amux == 8), 0);
+                    printRegister(registers, "A12", "\n", accumulator[12], 8, (amux == 12), 0);
+
+                    printRegister(registers, "A9", "", accumulator[9], 8, (amux == 9), 0);
+                    printRegister(registers, "A13", "\n", accumulator[13], 8, (amux == 13), 0);
+
+                    printRegister(registers, "A10", "", accumulator[10], 8, (amux == 10), 0);
+                    printRegister(registers, "A14", "\n", accumulator[14], 8, (amux == 14), 0);
+
+                    printRegister(registers, "A11", "", accumulator[11], 8, (amux == 11), 0);
+                    printRegister(registers, "A15", "\n", accumulator[15], 8, (amux == 15), 0);
+
+                    waddstr(registers, "\n");
+                    printRegister(registers, "Program Counter ", "\n", pc, 16, 0, 1);
+                    break;
+                case 2:
+                    printRegister(registers, "CPU Flags       ", "\n", flags, 8, 0, 1);
+                    printRegister(registers, "MDR             ", "\n", mdr, 8, 0, 1);
+                    printRegister(registers, "IA              ", "\n", ia, 8, 0, 1);
+
+                    waddstr(registers, "\n");
+                    waddstr(registers, "\n");
+                    printRegister(registers, "Program Counter ", "\n", pc, 16, 0, 1);
+                    break;
+                case 3:
+                    printRegister(registers, "Stack Pointer   ", "\n", stackpt, 8, 0, 1);
+                    printRegister(registers, "IR              ", "\n", ir, 16, 0, 1);
+                    printRegister(registers, "MAR             ", "\n", mar, 16, 0, 1);
+
+                    waddstr(registers, "\n");
+                    waddstr(registers, "\n");
+                    printRegister(registers, "Program Counter ", "\n", pc, 16, 0, 1);
+                    break;
+            }
+            break;
     }
 
     wnoutrefresh(registers);

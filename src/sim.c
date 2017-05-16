@@ -146,8 +146,10 @@ void mainloop() {
                 refreshStatusDisplay();
                 break;
             case 'r':
-                rdisplaymode = !rdisplaymode;
-                refreshRegisterDisplay();
+                displayNextRegisterPage();
+                break;
+            case 'R':
+                displayPreviousRegisterPage();
                 break;
             case 'p':
                 memdisplay = pc;
