@@ -78,6 +78,17 @@ static void finish(int sig) {
     exit(0);
 }
 
+int findNextBreakpoint(int stepSize) {
+    int i = (memdisplay + stepSize) & 0xFFFF;
+    for(; i != memdisplay; i = ((i + stepSize) & 0xFFFF)) { /* Treat i as a 16 bit integer */
+        if(breakpoints[i]) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
 void mainloop() {
     char docycle = 0;
     char running = 0; /* Needed so we can do a full GUI refresh if we break out of a run */
@@ -140,6 +151,24 @@ void mainloop() {
             case 'b':
                 breakpoints[memdisplay] = (breakpoints[memdisplay] + 1) & 0x01;
                 refreshMemoryDisplay();
+                break;
+            case 'n':
+                {
+                    int i = findNextBreakpoint(1);
+                    if(i != -1) {
+                        memdisplay = i;
+                        refreshMemoryDisplay();
+                    }
+                }
+                break;
+            case 'N':
+                {
+                    int i = findNextBreakpoint(-1);
+                    if(i != -1) {
+                        memdisplay = i;
+                        refreshMemoryDisplay();
+                    }
+                }
                 break;
             case 'm':
                 cyclemode = (cyclemode + 1) % 3;
