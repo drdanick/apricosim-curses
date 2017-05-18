@@ -2,6 +2,7 @@
 #include "cpu.h"
 #include "signal.h"
 #include "aprsim.h"
+#include "disassembler.h"
 
 /* TODO: This code is a hack job, and needs a rewrite */
 
@@ -29,6 +30,7 @@ void initgui() {
         winchHandler = &handle_winch;
         signal(SIGWINCH, handle_winch);
         registerPage = 0;
+        printDisassembly = 0;
     }
 
     curs_set(0);
@@ -271,7 +273,8 @@ void refreshRegisterDisplay() {
     wnoutrefresh(registers);
 }
 
-void printMemory(WINDOW* win, int y, int x, int address, int addressSize, int value, int is_breakpoint, int is_pointed_to, char* symbol) {
+void printMemory(WINDOW* win, int y, int x, int address, int addressSize, int value, int is_breakpoint, int is_pointed_to, int printDisassembly, char* symbol) {
+    static char suffixBuffer[64];
     wmove(win, y, x);
 
     waddstr(win, is_pointed_to ? ">" : " ");
@@ -280,12 +283,17 @@ void printMemory(WINDOW* win, int y, int x, int address, int addressSize, int va
     printHexString(win, address, addressSize);
     wprintw(win, ":    ");
     printHexString(win, value, 8);
-    wprintw(win, "     ");
+
+    if(printDisassembly) {
+        wprintw(win, "  %-20.20s  ", disassembleAddress(address));
+    } else {
+        wprintw(win, "     ");
+    }
 
     printBinaryString(win, value, 8);
 
     if(symbol) {
-        wprintw(win, "\t");
+        wprintw(win, "  ");
         waddstr(win, symbol);
     }
 }
@@ -327,6 +335,7 @@ void refreshMemoryDisplay() {
                     memory[memdisplay + i],
                     breakpoints[memdisplay + i],
                     pc == (memdisplay + i),
+                    printDisassembly,
                     symbols[memdisplay + i]);
         } else {
             wmove(mainmem, i, 0);
@@ -352,6 +361,7 @@ void refreshStackDisplay() {
                     stackmem[stackdisplay + i],
                     0,
                     stackpt == (stackdisplay + i),
+                    0,
                     NULL);
         } else {
             wmove(stack, i, 0);
@@ -405,7 +415,7 @@ void scrollMemoryDisplayUp(int lines){
 
     /* Draw new lines */
     for(i = oldmemdisplay - 1; i >= memdisplay; i--)
-        printMemory(mainmem, i - memdisplay, 0, i, 16, memory[i], breakpoints[i], pc == i, symbols[i]);
+        printMemory(mainmem, i - memdisplay, 0, i, 16, memory[i], breakpoints[i], pc == i, printDisassembly, symbols[i]);
     wnoutrefresh(mainmem);
 }
 
@@ -426,7 +436,7 @@ void scrollMemoryDisplayDown(int lines){
     /* Draw new lines */
     for(i = oldmemdisplay; i <= memdisplay; i++) {
         if(i < (65536 - drawOffset))
-            printMemory(mainmem, drawOffset - actualLines--, 0, i + drawOffset, 16, memory[i + drawOffset], breakpoints[i + drawOffset], pc == (i + drawOffset), symbols[i + drawOffset]);
+            printMemory(mainmem, drawOffset - actualLines--, 0, i + drawOffset, 16, memory[i + drawOffset], breakpoints[i + drawOffset], pc == (i + drawOffset), printDisassembly, symbols[i + drawOffset]);
         else
             mvwaddch(mainmem, drawOffset - actualLines--, 0, '~');
     }
@@ -446,7 +456,7 @@ void scrollStackDisplayUp(int lines){
 
     /* Draw new lines */
     for(i = oldstackdisplay - 1; i >= stackdisplay; i--)
-        printMemory(stack, i - stackdisplay, 0, i, 8, stackmem[i], 0, stackpt == i, NULL);
+        printMemory(stack, i - stackdisplay, 0, i, 8, stackmem[i], 0, stackpt == i, 0, NULL);
     wnoutrefresh(stack);
 }
 
@@ -467,7 +477,7 @@ void scrollStackDisplayDown(int lines) {
     /* Draw new lines */
     for(i = oldstackdisplay; i <= stackdisplay; i++) {
         if(i < (256 - drawOffset))
-            printMemory(stack, drawOffset - actualLines--, 0, i + drawOffset, 8, stackmem[i + drawOffset], 0, stackpt == (i + drawOffset), NULL);
+            printMemory(stack, drawOffset - actualLines--, 0, i + drawOffset, 8, stackmem[i + drawOffset], 0, stackpt == (i + drawOffset), 0, NULL);
         else
             mvwaddch(stack, drawOffset - actualLines--, 0, '~');
     }

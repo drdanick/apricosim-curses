@@ -2,6 +2,7 @@
 #include "argparser.h"
 #include "cpu.h"
 #include "gui.h"
+#include "disassembler.h"
 #ifdef PORT_EMU
 #include "ports.h"
 #endif
@@ -170,6 +171,10 @@ void mainloop() {
                     }
                 }
                 break;
+            case 'd':
+                printDisassembly = (printDisassembly + 1) % 2;
+                refreshMemoryDisplay();
+                break;
             case 'm':
                 cyclemode = (cyclemode + 1) % 3;
                 refreshStatusDisplay();
@@ -247,6 +252,7 @@ int main(int argc, char** argv) {
         loadSymbolsFile(settings.symbolsFile);
     }
 
+    initDisassembler(memory, symbols);
     initgui();
     refreshAll();
     refresh();

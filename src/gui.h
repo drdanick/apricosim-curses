@@ -11,7 +11,7 @@ void initRegisterPageLayout();
 void displayNextRegisterPage();
 void displayPreviousRegisterPage();
 void refreshRegisterDisplay();
-void printMemory(WINDOW* win, int y, int x, int address, int addressSize, int value, int is_breakpoint, int is_pointed_to, char* symbol);
+void printMemory(WINDOW* win, int y, int x, int address, int addressSize, int value, int is_breakpoint, int is_pointed_to, int printDisassembly, char* symbol);
 void refreshStatusDisplay();
 void refreshMemoryDisplay();
 void refreshStackDisplay();
@@ -55,6 +55,7 @@ int rx, ry, rw, rh, mx, my, mw, mh, sx, sy, sw, sh, ix, iy, iw, ih; /* GUI dimen
 
 int memdisplay; /* Memory display offset */
 int stackdisplay; /* Stack display offset */
+int printDisassembly; /* Non-zero if disassembly should be printed, zero otherwise */
 
 unsigned char cyclemode;
 unsigned char numberOfRegisterPages;
