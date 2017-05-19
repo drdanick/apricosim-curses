@@ -144,9 +144,11 @@ void initRegisterPageLayout() {
         default:
         case 0:
             numberOfRegisterPages = 2;
+            registerPage %= numberOfRegisterPages;
             break;
         case 1:
             numberOfRegisterPages = 4;
+            registerPage %= numberOfRegisterPages;
             break;
     }
 }
@@ -162,6 +164,9 @@ void displayPreviousRegisterPage() {
 }
 
 void refreshRegisterDisplay() {
+    box(registers_b,0,0);
+    mvwprintw(registers_b, 0, 2, " Registers (%d/%d)", registerPage+1, numberOfRegisterPages);
+    wrefresh(registers_b);
     werase(registers);
 
     switch(registerDisplayLayout) {
