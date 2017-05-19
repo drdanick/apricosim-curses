@@ -68,19 +68,8 @@ void initgui() {
     leaveok(stack, 1);
     leaveok(mainmem, 1);
 
-    box(registers_b,0,0);
-    box(mainmem_b,0,0);
-    box(stack_b,0,0);
-    box(info_b,0,0);
-    mvwprintw(registers_b, 0, rw - sizeof(PROGRAM_VERSION_STRING) - 3, " " PROGRAM_VERSION_STRING " ");
-    mvwprintw(registers_b, 0, 2, " Registers ");
-    mvwprintw(stack_b, 0, 2, " Stack ");
-    mvwprintw(mainmem_b, 0, 2, " Memory ");
+    refreshBorders();
 
-    wrefresh(registers_b);
-    wrefresh(info_b);
-    wrefresh(mainmem_b);
-    wrefresh(stack_b);
     wrefresh(registers);
     wrefresh(info);
     wrefresh(mainmem);
@@ -156,17 +145,32 @@ void initRegisterPageLayout() {
 void displayNextRegisterPage() {
     registerPage = (registerPage + 1) % numberOfRegisterPages;
     refreshRegisterDisplay();
+    refreshBorders();
 }
 
 void displayPreviousRegisterPage() {
     if(--registerPage < 0) registerPage = numberOfRegisterPages - 1;
     refreshRegisterDisplay();
+    refreshBorders();
+}
+
+void refreshBorders() {
+    box(registers_b,0,0);
+    box(mainmem_b,0,0);
+    box(stack_b,0,0);
+    box(info_b,0,0);
+    mvwprintw(registers_b, 0, rw - sizeof(PROGRAM_VERSION_STRING) - 3, " " PROGRAM_VERSION_STRING " ");
+    mvwprintw(registers_b, 0, 2, " Registers (%d/%d)", registerPage+1, numberOfRegisterPages);
+    mvwprintw(stack_b, 0, 2, " Stack ");
+    mvwprintw(mainmem_b, 0, 2, " Memory ");
+
+    wrefresh(registers_b);
+    wrefresh(info_b);
+    wrefresh(mainmem_b);
+    wrefresh(stack_b);
 }
 
 void refreshRegisterDisplay() {
-    box(registers_b,0,0);
-    mvwprintw(registers_b, 0, 2, " Registers (%d/%d)", registerPage+1, numberOfRegisterPages);
-    wrefresh(registers_b);
     werase(registers);
 
     switch(registerDisplayLayout) {

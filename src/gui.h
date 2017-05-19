@@ -12,6 +12,7 @@ void displayNextRegisterPage();
 void displayPreviousRegisterPage();
 void refreshRegisterDisplay();
 void printMemory(WINDOW* win, int y, int x, int address, int addressSize, int value, int is_breakpoint, int is_pointed_to, int printDisassembly, char* symbol);
+void refreshBorders();
 void refreshStatusDisplay();
 void refreshMemoryDisplay();
 void refreshStackDisplay();
