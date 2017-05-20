@@ -2,13 +2,16 @@
  APRICOSIM VERSION HISTORY
 ===========================
 
- Pre-release
+ V1.0 Pre-release
 ----------
  * Added the ability to jump to current program counter value in memory display.
- * Status bar moved into its own window
  * Added arithmetic overflow detection
  * Added the ability to read the status register and stack pointer
  * SHFl/r now supports operands up to 8
+ * GUI rearrangements and improvements
+ * Added mouse support to memory and stack displays
+ * Added a disassembler for loaded programs
+ * Added the ability to cycle between breakpoints
 
  V0.9
 ----------
