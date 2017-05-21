@@ -2,8 +2,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.65])
-AC_INIT([aprsim], [0.9], [nick@drdanick.com])
-AM_INIT_AUTOMAKE(aprsim, 0.9)
+AC_INIT([aprsim], [1.0], [nick@drdanick.com])
+AM_INIT_AUTOMAKE(aprsim, 1.0)
 AC_CONFIG_SRCDIR([src])
 #AC_CONFIG_HEADERS
 
