@@ -60,10 +60,12 @@ The simulator can be operated with the following controls:
 `j/k`         Scroll the memory display down/up.  
 `J/K`         Scroll the stack display down/up.  
 `PGdown/PGup` Scroll the memory display 256 lines down/up.  
+`r`           Move to the next page in the register display.  
 `p`           Jump to program counter position in memory display.  
-`r`           Toggle between register and CPU status display modes.  
+`n/N`         Jump to the next/previous breakpoint.  
 `b`           Toggle a breakpoint.  
-`m`           Toggle between state execution, instruction execution and automatic run modes.  
+`d`           Toggle disassembly view on/off.  
+`m`           Switch between state execution, instruction execution and automatic run modes.  
 `space`       Depending on mode, execute one CPU state/instruction or start automatic execution.  
 `q`           Quit the simulator.  
 `F1`          Interrupt the currently running program and quit the simulator.
