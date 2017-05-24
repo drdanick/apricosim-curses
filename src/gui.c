@@ -5,8 +5,10 @@
 #include "disassembler.h"
 
 /* TODO: This code is a hack job, and needs a rewrite */
+unsigned char guiLock = 0;
+unsigned char windowShouldResize = 0;
 
-void handle_winch(int sig) {
+void doResize() {
     destroygui();
     refresh(); /* This forces ncurses to pick up the new term size */
 
@@ -18,8 +20,33 @@ void handle_winch(int sig) {
     refreshStackDisplay();
     refreshStatusDisplay();
     refresh();
+}
+
+void handle_winch(int sig) {
+    if(!guiLock)
+        doResize();
+    else
+        windowShouldResize = 1;
 
     signal(SIGWINCH, handle_winch); /* Required under c89 */
+}
+
+/* This should be called BEFORE any other GUI operation is called to
+ * prevent corruption on resize.
+ */
+void lockGui() {
+    guiLock = 1;
+}
+
+/* This should be called AFTER any other GUI operation is called to
+ * prevent corruption on resize.
+ */
+void unlockGui() {
+    if(windowShouldResize) {
+        windowShouldResize = 0;
+        doResize();
+    }
+    guiLock = 0;
 }
 
 void initgui() {
@@ -68,12 +95,12 @@ void initgui() {
     leaveok(stack, 1);
     leaveok(mainmem, 1);
 
-    refreshBorders();
 
     wrefresh(registers);
     wrefresh(info);
     wrefresh(mainmem);
     wrefresh(stack);
+    refreshBorders();
 }
 
 void destroygui() {
@@ -143,18 +170,21 @@ void initRegisterPageLayout() {
 }
 
 void displayNextRegisterPage() {
+    lockGui();
     registerPage = (registerPage + 1) % numberOfRegisterPages;
     refreshRegisterDisplay();
     refreshBorders();
 }
 
 void displayPreviousRegisterPage() {
+    lockGui();
     if(--registerPage < 0) registerPage = numberOfRegisterPages - 1;
     refreshRegisterDisplay();
     refreshBorders();
 }
 
 void refreshBorders() {
+    lockGui();
     box(registers_b,0,0);
     box(mainmem_b,0,0);
     box(stack_b,0,0);
@@ -171,6 +201,7 @@ void refreshBorders() {
 }
 
 void refreshRegisterDisplay() {
+    lockGui();
     werase(registers);
 
     switch(registerDisplayLayout) {
@@ -179,46 +210,46 @@ void refreshRegisterDisplay() {
             switch(registerPage) {
                 default:
                 case 0:
-                    printRegister(registers, "A0", "", accumulator[0], 8, (amux == 0), 0);
-                    printRegister(registers, "A8", "\n", accumulator[8], 8, (amux == 8), 0);
+                    printRegister(&registers, "A0", "", accumulator[0], 8, (amux == 0), 0);
+                    printRegister(&registers, "A8", "\n", accumulator[8], 8, (amux == 8), 0);
 
-                    printRegister(registers, "A1", "", accumulator[1], 8, (amux == 1), 0);
-                    printRegister(registers, "A9", "\n", accumulator[9], 8, (amux == 9), 0);
+                    printRegister(&registers, "A1", "", accumulator[1], 8, (amux == 1), 0);
+                    printRegister(&registers, "A9", "\n", accumulator[9], 8, (amux == 9), 0);
 
-                    printRegister(registers, "A2", "", accumulator[2], 8, (amux == 2), 0);
-                    printRegister(registers, "A10", "\n", accumulator[10], 8, (amux == 10), 0);
+                    printRegister(&registers, "A2", "", accumulator[2], 8, (amux == 2), 0);
+                    printRegister(&registers, "A10", "\n", accumulator[10], 8, (amux == 10), 0);
 
-                    printRegister(registers, "A3", "", accumulator[3], 8, (amux == 3), 0);
-                    printRegister(registers, "A11", "\n", accumulator[11], 8, (amux == 11), 0);
+                    printRegister(&registers, "A3", "", accumulator[3], 8, (amux == 3), 0);
+                    printRegister(&registers, "A11", "\n", accumulator[11], 8, (amux == 11), 0);
 
-                    printRegister(registers, "A4", "", accumulator[4], 8, (amux == 4), 0);
-                    printRegister(registers, "A12", "\n", accumulator[12], 8, (amux == 12), 0);
+                    printRegister(&registers, "A4", "", accumulator[4], 8, (amux == 4), 0);
+                    printRegister(&registers, "A12", "\n", accumulator[12], 8, (amux == 12), 0);
 
-                    printRegister(registers, "A5", "", accumulator[5], 8, (amux == 5), 0);
-                    printRegister(registers, "A13", "\n", accumulator[13], 8, (amux == 13), 0);
+                    printRegister(&registers, "A5", "", accumulator[5], 8, (amux == 5), 0);
+                    printRegister(&registers, "A13", "\n", accumulator[13], 8, (amux == 13), 0);
 
-                    printRegister(registers, "A6", "", accumulator[6], 8, (amux == 6), 0);
-                    printRegister(registers, "A14", "\n", accumulator[14], 8, (amux == 14), 0);
+                    printRegister(&registers, "A6", "", accumulator[6], 8, (amux == 6), 0);
+                    printRegister(&registers, "A14", "\n", accumulator[14], 8, (amux == 14), 0);
 
-                    printRegister(registers, "A7", "", accumulator[7], 8, (amux == 7), 0);
-                    printRegister(registers, "A15", "\n", accumulator[15], 8, (amux == 15), 0);
+                    printRegister(&registers, "A7", "", accumulator[7], 8, (amux == 7), 0);
+                    printRegister(&registers, "A15", "\n", accumulator[15], 8, (amux == 15), 0);
 
                     waddstr(registers, "\n");
-                    printRegister(registers, "Program Counter ", "\n", pc, 16, 0, 1);
+                    printRegister(&registers, "Program Counter ", "\n", pc, 16, 0, 1);
 
 
                     break;
                 case 1:
-                    printRegister(registers, "CPU Flags       ", "\n", flags, 8, 0, 1);
-                    printRegister(registers, "MDR             ", "\n", mdr, 8, 0, 1);
-                    printRegister(registers, "IA              ", "\n", ia, 8, 0, 1);
-                    printRegister(registers, "Stack Pointer   ", "\n", stackpt, 8, 0, 1);
-                    printRegister(registers, "IR              ", "\n", ir, 16, 0, 1);
-                    printRegister(registers, "MAR             ", "\n", mar, 16, 0, 1);
+                    printRegister(&registers, "CPU Flags       ", "\n", flags, 8, 0, 1);
+                    printRegister(&registers, "MDR             ", "\n", mdr, 8, 0, 1);
+                    printRegister(&registers, "IA              ", "\n", ia, 8, 0, 1);
+                    printRegister(&registers, "Stack Pointer   ", "\n", stackpt, 8, 0, 1);
+                    printRegister(&registers, "IR              ", "\n", ir, 16, 0, 1);
+                    printRegister(&registers, "MAR             ", "\n", mar, 16, 0, 1);
                     waddstr(registers, "\n");
                     waddstr(registers, "\n");
                     waddstr(registers, "\n");
-                    printRegister(registers, "Program Counter ", "\n", pc, 16, 0, 1);
+                    printRegister(&registers, "Program Counter ", "\n", pc, 16, 0, 1);
                     break;
             }
             break;
@@ -226,54 +257,54 @@ void refreshRegisterDisplay() {
             switch(registerPage) {
                 default:
                 case 0:
-                    printRegister(registers, "A0", "", accumulator[0], 8, (amux == 0), 0);
-                    printRegister(registers, "A4", "\n", accumulator[4], 8, (amux == 4), 0);
+                    printRegister(&registers, "A0", "", accumulator[0], 8, (amux == 0), 0);
+                    printRegister(&registers, "A4", "\n", accumulator[4], 8, (amux == 4), 0);
 
-                    printRegister(registers, "A1", "", accumulator[1], 8, (amux == 1), 0);
-                    printRegister(registers, "A5", "\n", accumulator[5], 8, (amux == 5), 0);
+                    printRegister(&registers, "A1", "", accumulator[1], 8, (amux == 1), 0);
+                    printRegister(&registers, "A5", "\n", accumulator[5], 8, (amux == 5), 0);
 
-                    printRegister(registers, "A2", "", accumulator[2], 8, (amux == 2), 0);
-                    printRegister(registers, "A6", "\n", accumulator[6], 8, (amux == 6), 0);
+                    printRegister(&registers, "A2", "", accumulator[2], 8, (amux == 2), 0);
+                    printRegister(&registers, "A6", "\n", accumulator[6], 8, (amux == 6), 0);
 
-                    printRegister(registers, "A3", "", accumulator[3], 8, (amux == 3), 0);
-                    printRegister(registers, "A7", "\n", accumulator[7], 8, (amux == 7), 0);
+                    printRegister(&registers, "A3", "", accumulator[3], 8, (amux == 3), 0);
+                    printRegister(&registers, "A7", "\n", accumulator[7], 8, (amux == 7), 0);
 
                     waddstr(registers, "\n");
-                    printRegister(registers, "Program Counter ", "\n", pc, 16, 0, 1);
+                    printRegister(&registers, "Program Counter ", "\n", pc, 16, 0, 1);
                     break;
                 case 1:
-                    printRegister(registers, "A8", "", accumulator[8], 8, (amux == 8), 0);
-                    printRegister(registers, "A12", "\n", accumulator[12], 8, (amux == 12), 0);
+                    printRegister(&registers, "A8", "", accumulator[8], 8, (amux == 8), 0);
+                    printRegister(&registers, "A12", "\n", accumulator[12], 8, (amux == 12), 0);
 
-                    printRegister(registers, "A9", "", accumulator[9], 8, (amux == 9), 0);
-                    printRegister(registers, "A13", "\n", accumulator[13], 8, (amux == 13), 0);
+                    printRegister(&registers, "A9", "", accumulator[9], 8, (amux == 9), 0);
+                    printRegister(&registers, "A13", "\n", accumulator[13], 8, (amux == 13), 0);
 
-                    printRegister(registers, "A10", "", accumulator[10], 8, (amux == 10), 0);
-                    printRegister(registers, "A14", "\n", accumulator[14], 8, (amux == 14), 0);
+                    printRegister(&registers, "A10", "", accumulator[10], 8, (amux == 10), 0);
+                    printRegister(&registers, "A14", "\n", accumulator[14], 8, (amux == 14), 0);
 
-                    printRegister(registers, "A11", "", accumulator[11], 8, (amux == 11), 0);
-                    printRegister(registers, "A15", "\n", accumulator[15], 8, (amux == 15), 0);
+                    printRegister(&registers, "A11", "", accumulator[11], 8, (amux == 11), 0);
+                    printRegister(&registers, "A15", "\n", accumulator[15], 8, (amux == 15), 0);
 
                     waddstr(registers, "\n");
-                    printRegister(registers, "Program Counter ", "\n", pc, 16, 0, 1);
+                    printRegister(&registers, "Program Counter ", "\n", pc, 16, 0, 1);
                     break;
                 case 2:
-                    printRegister(registers, "CPU Flags       ", "\n", flags, 8, 0, 1);
-                    printRegister(registers, "MDR             ", "\n", mdr, 8, 0, 1);
-                    printRegister(registers, "IA              ", "\n", ia, 8, 0, 1);
+                    printRegister(&registers, "CPU Flags       ", "\n", flags, 8, 0, 1);
+                    printRegister(&registers, "MDR             ", "\n", mdr, 8, 0, 1);
+                    printRegister(&registers, "IA              ", "\n", ia, 8, 0, 1);
 
                     waddstr(registers, "\n");
                     waddstr(registers, "\n");
-                    printRegister(registers, "Program Counter ", "\n", pc, 16, 0, 1);
+                    printRegister(&registers, "Program Counter ", "\n", pc, 16, 0, 1);
                     break;
                 case 3:
-                    printRegister(registers, "Stack Pointer   ", "\n", stackpt, 8, 0, 1);
-                    printRegister(registers, "IR              ", "\n", ir, 16, 0, 1);
-                    printRegister(registers, "MAR             ", "\n", mar, 16, 0, 1);
+                    printRegister(&registers, "Stack Pointer   ", "\n", stackpt, 8, 0, 1);
+                    printRegister(&registers, "IR              ", "\n", ir, 16, 0, 1);
+                    printRegister(&registers, "MAR             ", "\n", mar, 16, 0, 1);
 
                     waddstr(registers, "\n");
                     waddstr(registers, "\n");
-                    printRegister(registers, "Program Counter ", "\n", pc, 16, 0, 1);
+                    printRegister(&registers, "Program Counter ", "\n", pc, 16, 0, 1);
                     break;
             }
             break;
@@ -282,32 +313,34 @@ void refreshRegisterDisplay() {
     wnoutrefresh(registers);
 }
 
-void printMemory(WINDOW* win, int y, int x, int address, int addressSize, int value, int is_breakpoint, int is_pointed_to, int printDisassembly, char* symbol) {
+void printMemory(WINDOW** win, int y, int x, int address, int addressSize, int value, int is_breakpoint, int is_pointed_to, int printDisassembly, char* symbol) {
+    lockGui();
     static char suffixBuffer[64];
-    wmove(win, y, x);
+    wmove(*win, y, x);
 
-    waddstr(win, is_pointed_to ? ">" : " ");
-    waddstr(win, is_breakpoint ? "   @0x" : "    0x");
+    waddstr(*win, is_pointed_to ? ">" : " ");
+    waddstr(*win, is_breakpoint ? "   @0x" : "    0x");
 
     printHexString(win, address, addressSize);
-    wprintw(win, ":    ");
+    wprintw(*win, ":    ");
     printHexString(win, value, 8);
 
     if(printDisassembly) {
-        wprintw(win, "  %-20.20s  ", disassembleAddress(address));
+        wprintw(*win, "  %-20.20s  ", disassembleAddress(address));
     } else {
-        wprintw(win, "     ");
+        wprintw(*win, "     ");
     }
 
     printBinaryString(win, value, 8);
 
     if(symbol) {
-        wprintw(win, "  ");
-        waddstr(win, symbol);
+        wprintw(*win, "  ");
+        waddstr(*win, symbol);
     }
 }
 
 void clearStatusDisplay() {
+    lockGui();
     int i = 0;
     wmove(info, 0, 0);
     for(; i < iw - 2; i++) {
@@ -317,9 +350,10 @@ void clearStatusDisplay() {
 }
 
 void refreshStatusDisplay() {
+    lockGui();
     clearStatusDisplay();
     mvwaddstr(info, 0,3, "State: 0x");
-    printHexString(info, currentState, 8);
+    printHexString(&info, currentState, 8);
     wprintw(info, "  Instruction Count: %d  Cycle Count: %d  Mode: %s",instructionCount, cycleCount,cyclemode ? ((cyclemode == 1) ? "INSTRUCTION" : "RUN") : "STATE");
 
     mvhline(iy, 0, 0, iw);
@@ -330,13 +364,14 @@ void refreshStatusDisplay() {
 }
 
 void refreshMemoryDisplay() {
+    lockGui();
     int i = 0;
     werase(mainmem);
 
     for(; i < mh - 2; i++) {
         if(i + memdisplay < 65536) {
             printMemory(
-                    mainmem,
+                    &mainmem,
                     i,
                     0,
                     i + memdisplay,
@@ -356,13 +391,14 @@ void refreshMemoryDisplay() {
 }
 
 void refreshStackDisplay() {
+    lockGui();
     int i = 0;
     werase(stack);
 
     for(; i < sh - 2; i++) {
         if(i + stackdisplay < 256) {
             printMemory(
-                    stack,
+                    &stack,
                     i,
                     0,
                     i + stackdisplay,
@@ -389,6 +425,7 @@ void refreshAll() {
 }
 
 void handleLeftClick(int mouseY, int mouseX) {
+    lockGui();
     if(wmouse_trafo(mainmem, &mouseY, &mouseX, 0) && memdisplay + mouseY < 65536) {
         breakpoints[memdisplay + mouseY] = (breakpoints[memdisplay + mouseY] + 1) & 0x01;
         refreshMemoryDisplay();
@@ -396,6 +433,7 @@ void handleLeftClick(int mouseY, int mouseX) {
 }
 
 void scrollSelectedDisplayUp(int mouseY, int mouseX, int lines) {
+    lockGui();
     if(wenclose(stack_b, mouseY, mouseX)) {
         scrollStackDisplayUp(lines);
     } else {
@@ -404,6 +442,7 @@ void scrollSelectedDisplayUp(int mouseY, int mouseX, int lines) {
 }
 
 void scrollSelectedDisplayDown(int mouseY, int mouseX, int lines) {
+    lockGui();
     if(wenclose(stack_b, mouseY, mouseX)) {
         scrollStackDisplayDown(lines);
     } else {
@@ -412,6 +451,7 @@ void scrollSelectedDisplayDown(int mouseY, int mouseX, int lines) {
 }
 
 void scrollMemoryDisplayUp(int lines){
+    lockGui();
     int oldmemdisplay = memdisplay;
     int i;
     memdisplay -= lines;
@@ -424,11 +464,12 @@ void scrollMemoryDisplayUp(int lines){
 
     /* Draw new lines */
     for(i = oldmemdisplay - 1; i >= memdisplay; i--)
-        printMemory(mainmem, i - memdisplay, 0, i, 16, memory[i], breakpoints[i], pc == i, printDisassembly, symbols[i]);
+        printMemory(&mainmem, i - memdisplay, 0, i, 16, memory[i], breakpoints[i], pc == i, printDisassembly, symbols[i]);
     wnoutrefresh(mainmem);
 }
 
 void scrollMemoryDisplayDown(int lines){
+    lockGui();
     int oldmemdisplay = memdisplay;
     int drawOffset = mh - 3;
     int i;
@@ -445,7 +486,7 @@ void scrollMemoryDisplayDown(int lines){
     /* Draw new lines */
     for(i = oldmemdisplay; i <= memdisplay; i++) {
         if(i < (65536 - drawOffset))
-            printMemory(mainmem, drawOffset - actualLines--, 0, i + drawOffset, 16, memory[i + drawOffset], breakpoints[i + drawOffset], pc == (i + drawOffset), printDisassembly, symbols[i + drawOffset]);
+            printMemory(&mainmem, drawOffset - actualLines--, 0, i + drawOffset, 16, memory[i + drawOffset], breakpoints[i + drawOffset], pc == (i + drawOffset), printDisassembly, symbols[i + drawOffset]);
         else
             mvwaddch(mainmem, drawOffset - actualLines--, 0, '~');
     }
@@ -453,6 +494,7 @@ void scrollMemoryDisplayDown(int lines){
 }
 
 void scrollStackDisplayUp(int lines){
+    lockGui();
     int oldstackdisplay = stackdisplay;
     int i;
 
@@ -465,11 +507,12 @@ void scrollStackDisplayUp(int lines){
 
     /* Draw new lines */
     for(i = oldstackdisplay - 1; i >= stackdisplay; i--)
-        printMemory(stack, i - stackdisplay, 0, i, 8, stackmem[i], 0, stackpt == i, 0, NULL);
+        printMemory(&stack, i - stackdisplay, 0, i, 8, stackmem[i], 0, stackpt == i, 0, NULL);
     wnoutrefresh(stack);
 }
 
 void scrollStackDisplayDown(int lines) {
+    lockGui();
     int oldstackdisplay = stackdisplay;
     int drawOffset = sh - 3;
     int actualLines;
@@ -486,16 +529,17 @@ void scrollStackDisplayDown(int lines) {
     /* Draw new lines */
     for(i = oldstackdisplay; i <= stackdisplay; i++) {
         if(i < (256 - drawOffset))
-            printMemory(stack, drawOffset - actualLines--, 0, i + drawOffset, 8, stackmem[i + drawOffset], 0, stackpt == (i + drawOffset), 0, NULL);
+            printMemory(&stack, drawOffset - actualLines--, 0, i + drawOffset, 8, stackmem[i + drawOffset], 0, stackpt == (i + drawOffset), 0, NULL);
         else
             mvwaddch(stack, drawOffset - actualLines--, 0, '~');
     }
     wnoutrefresh(stack);
 }
 
-void printRegister(WINDOW* win, char* name, char* suffix, int value, int size, char mark, char doubleWordAlignment) {
+void printRegister(WINDOW** win, char* name, char* suffix, int value, int size, char mark, char doubleWordAlignment) {
+    lockGui();
     if(doubleWordAlignment) {
-        wprintw(win, "[%-4s: %-5d :: 0x%-4s :: %16sb %c]%s",
+        wprintw(*win, "[%-4s: %-5d :: 0x%-4s :: %16sb %c]%s",
                 name,
                 value,
                 getHexString(value, size),
@@ -503,7 +547,7 @@ void printRegister(WINDOW* win, char* name, char* suffix, int value, int size, c
                 mark ? '<' : ' ',
                 suffix);
     } else {
-        wprintw(win, "[%-4s: %-3d :: 0x%-2s :: %8sb %c]%s",
+        wprintw(*win, "[%-4s: %-3d :: 0x%-2s :: %8sb %c]%s",
                 name,
                 value,
                 getHexString(value, size),
@@ -525,8 +569,9 @@ char* getBinaryString(unsigned int num, unsigned int size) {
     return buffer;
 }
 
-void printBinaryString(WINDOW* win, unsigned int num, unsigned int size) {
-    wprintw(win, "%s", getBinaryString(num, size));
+void printBinaryString(WINDOW** win, unsigned int num, unsigned int size) {
+    lockGui();
+    wprintw(*win, "%s", getBinaryString(num, size));
 }
 
 char* getHexString(unsigned int num, unsigned int size) {
@@ -542,6 +587,7 @@ char* getHexString(unsigned int num, unsigned int size) {
     return buffer;
 }
 
-void printHexString(WINDOW* win, unsigned int num, unsigned int size) {
-    wprintw(win, "%s", getHexString(num, size));
+void printHexString(WINDOW** win, unsigned int num, unsigned int size) {
+    lockGui();
+    wprintw(*win, "%s", getHexString(num, size));
 }

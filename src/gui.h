@@ -11,7 +11,7 @@ void initRegisterPageLayout();
 void displayNextRegisterPage();
 void displayPreviousRegisterPage();
 void refreshRegisterDisplay();
-void printMemory(WINDOW* win, int y, int x, int address, int addressSize, int value, int is_breakpoint, int is_pointed_to, int printDisassembly, char* symbol);
+void printMemory(WINDOW** win, int y, int x, int address, int addressSize, int value, int is_breakpoint, int is_pointed_to, int printDisassembly, char* symbol);
 void refreshBorders();
 void refreshStatusDisplay();
 void refreshMemoryDisplay();
@@ -24,11 +24,13 @@ void scrollMemoryDisplayUp(int lines);
 void scrollMemoryDisplayDown(int lines);
 void scrollStackDisplayUp(int lines);
 void scrollStackDisplayDown(int lines);
-void printRegister(WINDOW* win, char* name, char* suffix, int value, int size, char mark, char doubleWordAlignment);
+void printRegister(WINDOW** win, char* name, char* suffix, int value, int size, char mark, char doubleWordAlignment);
 char* getBinaryString(unsigned int num, unsigned int size);
-void printBinaryString(WINDOW* win, unsigned int num, unsigned int size);
+void printBinaryString(WINDOW** win, unsigned int num, unsigned int size);
 char* getHexString(unsigned int num, unsigned int size);
-void printHexString(WINDOW* win, unsigned int num, unsigned int size);
+void printHexString(WINDOW** win, unsigned int num, unsigned int size);
+void lockGui();
+void unlockGui();
 
 
 /* Constants */
