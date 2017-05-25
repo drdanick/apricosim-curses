@@ -113,5 +113,12 @@ unsigned char* stackmem;
 
 /* Debug stuff */
 char* symbols[65536];
+char  hints[65536];
+
+/* Disassembly hint types */
+#define HINT_INST 0x01
+#define HINT_IARG 0x02
+#define HINT_NDAT 0x03
+#define HINT_CDAT 0x04
 
 #endif /*CPU_H*/

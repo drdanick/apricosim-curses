@@ -8,6 +8,7 @@ typedef struct {
     char* fifoFile;
     char* serialFile;
     char* symbolsFile;
+    char* hintsFile;
     int binFileCount;
     char** binFiles;
 } Settings;
@@ -20,6 +21,7 @@ const static struct option long_options[] = {
     {"serial_tty_file", required_argument, 0, 'u'},
 #endif /* TTY_EMU */
     {"symbols", required_argument, 0, 's'},
+    {"hints", required_argument, 0, 'd'},
     {0, 0, 0, 0}
 };
 
@@ -31,6 +33,7 @@ const static char* option_descriptions[] = {
     "Set serial tty file",
 #endif /* TTY_EMU */
     "Load symbols file"
+    "Load disassembler hints file"
 };
 
 Settings getSettingsFromArgs(int argc, char** argv);

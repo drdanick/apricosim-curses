@@ -10,9 +10,9 @@ void printHelp() {
     struct option coption;
     printf("%s usage:\n", PROGRAM_NAME);
 #ifdef TTY_EMU
-    printf("\taprsim [options] [-f file | -u file] [-s file] [binfiles...]\n");
+    printf("\taprsim [options] [-f file | -u file] [-s file] [-d file] [binfiles...]\n");
 #else
-    printf("\taprsim [options] [-s file] [binfiles...]\n");
+    printf("\taprsim [options] [-s file] [-d file] [binfiles...]\n");
 #endif /* TTY_EMU */
     printf("Options:\n");
     while(coption = long_options[i],
@@ -32,12 +32,13 @@ Settings getSettingsFromArgs(int argc, char** argv) {
 
     s.serialFile = NULL;
     s.symbolsFile = NULL;
+    s.hintsFile = NULL;
     s.fifoFile = NULL;
     s.binFiles = NULL;
 #ifdef TTY_EMU
-    while(c = getopt_long(argc, argv, "vhf:u:s:", long_options, NULL), c != -1) {
+    while(c = getopt_long(argc, argv, "vhf:u:s:d:", long_options, NULL), c != -1) {
 #else
-    while(c = getopt_long(argc, argv, "vhs:", long_options, NULL), c != -1) {
+    while(c = getopt_long(argc, argv, "vhs:d:", long_options, NULL), c != -1) {
 #endif /* TTY_EMU */
         switch(c) {
             case 'v':
@@ -58,6 +59,9 @@ Settings getSettingsFromArgs(int argc, char** argv) {
 #endif /* TTY_EMU */
             case 's':
                 s.symbolsFile = optarg;
+                break;
+            case 'd':
+                s.hintsFile = optarg;
                 break;
             case '?':
             default:

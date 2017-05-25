@@ -38,6 +38,36 @@ void loadProgram(char* filename) {
     }
 }
 
+void loadDisassemblyHintsFile(char* filename) {
+    FILE* f = fopen(filename, "r");
+    int length;
+    unsigned char lengthBuff[2];
+    unsigned char hintBuff[3];
+
+    if(f == NULL)
+        return;
+
+    /* Get the table length (2-byte big endian integer) */
+    fread(lengthBuff, 1, 2, f);
+    length = lengthBuff[0];
+    length = (length << 8) | lengthBuff[1];
+
+    for(; length > 0; length--) {
+        int location;
+        unsigned char hint;
+        /* Read the location of the next hint (2-byte big endian integer) */
+        fread(hintBuff, 1, 3, f);
+        location = hintBuff[0];
+        location = (location << 8) | hintBuff[1];
+
+        /* Read the hint */
+        hint = hintBuff[2];
+
+        /* Put the hint into the table */
+        hints[location] = hint;
+    }
+}
+
 void loadSymbolsFile(char* filename) {
     FILE* f = fopen(filename, "r");
 
@@ -101,98 +131,101 @@ void mainloop() {
     mouseinterval(0); /* Apparently fixes some bugs in some terminals */
 
     for(;;) {
+        unlockGui();
         if(c = getch(), c == ERR && !docycle) {
             /* Prevent this busy wait from consuming too much CPU time */
             usleep(10);
             continue;
         }
 
-        switch(c) {
-            case KEY_MOUSE:
-                if(getmouse(&event) == OK) {
-                    if(event.bstate & BUTTON1_PRESSED) { /* Left click */
-                        handleLeftClick(event.y, event.x);
-                    } else if (event.bstate & BUTTON4_PRESSED) { /* Scroll up */
-                        scrollSelectedDisplayUp(event.y, event.x,
-                                (event.bstate & BUTTON_SHIFT) ? MOUSE_SCROLL_LINES * 2 : MOUSE_SCROLL_LINES);
-                    } else if (event.bstate & BUTTON5_PRESSED) { /* Scroll down */
-                        scrollSelectedDisplayDown(event.y, event.x,
-                                (event.bstate & BUTTON_SHIFT) ? MOUSE_SCROLL_LINES * 2 : MOUSE_SCROLL_LINES);
+        if(!running || c == ' ' || c == KEY_F(1)) {
+            switch(c) {
+                case KEY_MOUSE:
+                    if(getmouse(&event) == OK) {
+                        if(event.bstate & BUTTON1_PRESSED) { /* Left click */
+                            handleLeftClick(event.y, event.x);
+                        } else if (event.bstate & BUTTON4_PRESSED) { /* Scroll up */
+                            scrollSelectedDisplayUp(event.y, event.x,
+                                    (event.bstate & BUTTON_SHIFT) ? MOUSE_SCROLL_LINES * 2 : MOUSE_SCROLL_LINES);
+                        } else if (event.bstate & BUTTON5_PRESSED) { /* Scroll down */
+                            scrollSelectedDisplayDown(event.y, event.x,
+                                    (event.bstate & BUTTON_SHIFT) ? MOUSE_SCROLL_LINES * 2 : MOUSE_SCROLL_LINES);
+                        }
                     }
-                }
-                break;
-            case ' ':
-                docycle = !docycle;
-                break;
-            case 'j':
-                scrollMemoryDisplayDown(1);
-                break;
-            case 'k':
-                scrollMemoryDisplayUp(1);
-                break;
-            case 'J':
-                scrollStackDisplayDown(1);
-                break;
-            case 'K':
-                scrollStackDisplayUp(1);
-                break;
-            case KEY_NPAGE: /* page down */
-                memdisplay += 0x0100;
-                if(memdisplay > 0xFFFF)
-                    memdisplay = 0xFFFF;
-                refreshMemoryDisplay();
-                break;
-            case KEY_PPAGE:
-                if(memdisplay > 0x0100)
-                    memdisplay -= 0x0100;
-                else
-                    memdisplay = 0;
-                refreshMemoryDisplay();
-                break;
-            case 'b':
-                breakpoints[memdisplay] = (breakpoints[memdisplay] + 1) & 0x01;
-                refreshMemoryDisplay();
-                break;
-            case 'n':
-                {
-                    int i = findNextBreakpoint(1);
-                    if(i != -1) {
-                        memdisplay = i;
-                        refreshMemoryDisplay();
+                    break;
+                case ' ':
+                    docycle = !docycle;
+                    break;
+                case 'j':
+                    scrollMemoryDisplayDown(1);
+                    break;
+                case 'k':
+                    scrollMemoryDisplayUp(1);
+                    break;
+                case 'J':
+                    scrollStackDisplayDown(1);
+                    break;
+                case 'K':
+                    scrollStackDisplayUp(1);
+                    break;
+                case KEY_NPAGE: /* page down */
+                    memdisplay += 0x0100;
+                    if(memdisplay > 0xFFFF)
+                        memdisplay = 0xFFFF;
+                    refreshMemoryDisplay();
+                    break;
+                case KEY_PPAGE:
+                    if(memdisplay > 0x0100)
+                        memdisplay -= 0x0100;
+                    else
+                        memdisplay = 0;
+                    refreshMemoryDisplay();
+                    break;
+                case 'b':
+                    breakpoints[memdisplay] = (breakpoints[memdisplay] + 1) & 0x01;
+                    refreshMemoryDisplay();
+                    break;
+                case 'n':
+                    {
+                        int i = findNextBreakpoint(1);
+                        if(i != -1) {
+                            memdisplay = i;
+                            refreshMemoryDisplay();
+                        }
                     }
-                }
-                break;
-            case 'N':
-                {
-                    int i = findNextBreakpoint(-1);
-                    if(i != -1) {
-                        memdisplay = i;
-                        refreshMemoryDisplay();
+                    break;
+                case 'N':
+                    {
+                        int i = findNextBreakpoint(-1);
+                        if(i != -1) {
+                            memdisplay = i;
+                            refreshMemoryDisplay();
+                        }
                     }
-                }
-                break;
-            case 'd':
-                printDisassembly = (printDisassembly + 1) % 2;
-                refreshMemoryDisplay();
-                break;
-            case 'm':
-                cyclemode = (cyclemode + 1) % 3;
-                refreshStatusDisplay();
-                break;
-            case 'r':
-                displayNextRegisterPage();
-                break;
-            case 'R':
-                displayPreviousRegisterPage();
-                break;
-            case 'p':
-                memdisplay = pc;
-                refreshMemoryDisplay();
-                break;
-            case 'q':
-            case 'Q':
-            case KEY_F(1):
-                return;
+                    break;
+                case 'd':
+                    printDisassembly = (printDisassembly + 1) % 2;
+                    refreshMemoryDisplay();
+                    break;
+                case 'm':
+                    cyclemode = (cyclemode + 1) % 3;
+                    refreshStatusDisplay();
+                    break;
+                case 'r':
+                    displayNextRegisterPage();
+                    break;
+                case 'R':
+                    displayPreviousRegisterPage();
+                    break;
+                case 'p':
+                    memdisplay = pc;
+                    refreshMemoryDisplay();
+                    break;
+                case 'q':
+                case 'Q':
+                case KEY_F(1):
+                    return;
+            }
         }
 
         /* Perform a cycle if required */
@@ -248,8 +281,12 @@ int main(int argc, char** argv) {
     for(i = 0; i < settings.binFileCount; i++)
         loadProgram(settings.binFiles[i]);
 
-    if(settings.symbolsFile != NULL) {
+    if(settings.symbolsFile) {
         loadSymbolsFile(settings.symbolsFile);
+    }
+
+    if(settings.hintsFile) {
+        loadDisassemblyHintsFile(settings.hintsFile);
     }
 
     initDisassembler(memory, symbols);

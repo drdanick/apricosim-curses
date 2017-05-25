@@ -1,10 +1,5 @@
 /*
  * A simple disassembler for Apricos binaries
- *
- * Since it's impossible to make this 100% accurate,
- * this should be considered a placeholder until
- * apricos binaries can contain hints as to how each byte
- * should be disassembled.
  */
 #include "disassembler.h"
 #include "cpu.h"
@@ -42,7 +37,7 @@ char* getSymbolAtAddress(unsigned int address, unsigned char literalValue, char 
     return buffer;
 }
 
-char* disassembleAddress(unsigned int address) {
+char* disassembleInstruction(unsigned int address) {
     static char buffer[32];
     unsigned char data, nextData;
     char imm4;
@@ -162,6 +157,59 @@ char* disassembleAddress(unsigned int address) {
             break;
     }
 
+    return buffer;
+}
+
+char* disassembleData(unsigned int address, char numeric) {
+    static char buffer[8];
+
+    address &= 0xFFFF;
+    buffer[0] = '\0';
+
+    if(!disassembler.memory || !disassembler.symbols) {
+        return buffer;
+    }
+
+    if(numeric) {
+        sprintf(buffer, "%u", memory[address]);
+    } else {
+        if(memory[address] >= ' ') { /* Only print printable characters. (Everything before a space in ASCII is non-printable) */
+            sprintf(buffer, "'%c'", (memory[address]));
+        } else { /* ...if it's not printable, check if it's a control character */
+            switch(memory[address]) { /* We need to specify the actual bytes here. Escape codes may expand to more than one byte under some OS' */
+                case 0:
+                    sprintf(buffer, "'\\0'");
+                    break;
+                case 9:
+                    sprintf(buffer, "'\\t'");
+                    break;
+                case 10:
+                    sprintf(buffer, "'\\n'");
+                    break;
+                case 13:
+                    sprintf(buffer, "'\\r'");
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
 
     return buffer;
+}
+
+char* disassembleAddress(unsigned int address) {
+    static char nothing = '\0';
+
+    switch(hints[address]) {
+        case HINT_NDAT:
+            return disassembleData(address, 1);
+        case HINT_CDAT:
+            return disassembleData(address, 0);
+        case HINT_IARG:
+            return &nothing;
+        case HINT_INST:
+        default:
+            return disassembleInstruction(address);
+    }
 }

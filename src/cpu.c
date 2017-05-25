@@ -43,6 +43,9 @@ void resetMachine() { /* Clear the registers */
 
     /* Clear the symbols table */
     memset(symbols, 0, 65536);
+
+    /* Clear the debug hint table */
+    memset(hints, 0, 65536);
 }
 
 void cycle() {
