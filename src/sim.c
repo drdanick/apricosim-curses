@@ -134,7 +134,7 @@ void mainloop() {
         unlockGui();
         if(c = getch(), c == ERR && !docycle) {
             /* Prevent this busy wait from consuming too much CPU time */
-            usleep(10);
+            usleep(1000);
             continue;
         }
 
@@ -225,6 +225,8 @@ void mainloop() {
                 case 'Q':
                 case KEY_F(1):
                     return;
+                default:
+                    break;
             }
         }
 
