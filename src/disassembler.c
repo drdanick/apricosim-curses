@@ -21,15 +21,15 @@ char* getSymbolAtAddress(unsigned int address, unsigned char literalValue, char 
     static char buffer[64];
     if(symbols[address]) {
         if(!printLiteralInHex) {
-            sprintf(buffer, "%d (%s)", literalValue, symbols[address]);
+            snprintf(buffer, sizeof(buffer), "%d (%s)", literalValue, symbols[address]);
         } else {
-            sprintf(buffer, "x%s (%s)", getHexString(literalValue, 8), symbols[address]);
+            snprintf(buffer, sizeof(buffer), "x%s (%s)", getHexString(literalValue, 8), symbols[address]);
         }
     } else {
         if(!printLiteralInHex) {
-            sprintf(buffer, "%d", literalValue);
+            snprintf(buffer, sizeof(buffer), "%d", literalValue);
         } else {
-            sprintf(buffer, "x%s", getHexString(literalValue, 8));
+            snprintf(buffer, sizeof(buffer), "x%s", getHexString(literalValue, 8));
         }
         return buffer;
     }
@@ -68,78 +68,78 @@ char* disassembleInstruction(unsigned int address) {
     switch(data >> 4) {
         case ADD:
             if(data != 0) {
-                sprintf(buffer, "ADD %d", imm4);
+                snprintf(buffer, sizeof(buffer), "ADD %d", imm4);
             }
             break;
         case AND:
-            sprintf(buffer, "AND %d", imm4);
+            snprintf(buffer, sizeof(buffer), "AND %d", imm4);
             break;
         case OR:
-            sprintf(buffer, "OR %d", imm4);
+            snprintf(buffer, sizeof(buffer), "OR %d", imm4);
             break;
         case XOR:
-            sprintf(buffer, "XOR %d", imm4);
+            snprintf(buffer, sizeof(buffer), "XOR %d", imm4);
             break;
         case NOT:
-            sprintf(buffer, "NOT");
+            snprintf(buffer, sizeof(buffer), "NOT");
             break;
         case SHF:
-            sprintf(buffer, "SHF%c %d", f1 ? 'r' : 'l', imm3 + 1);
+            snprintf(buffer, sizeof(buffer), "SHF%c %d", f1 ? 'r' : 'l', imm3 + 1);
             break;
         case LD:
             if(f1) {
-                sprintf(buffer, "LDa%c", f2 ? 'h' : 'l');
+                snprintf(buffer, sizeof(buffer), "LDa%c", f2 ? 'h' : 'l');
             } else {
-                sprintf(buffer, "LD");
+                snprintf(buffer, sizeof(buffer), "LD");
             }
             break;
         case LDI:
-            sprintf(buffer, "LDI %s", getSymbolAtAddress(address + nextData + 2, nextData, 0));
+            snprintf(buffer, sizeof(buffer), "LDI %s", getSymbolAtAddress(address + nextData + 2, nextData, 0));
             break;
         case ST:
             if(f1) {
-                sprintf(buffer, "STa%c", f2 ? 'h' : 'l');
+                snprintf(buffer, sizeof(buffer), "STa%c", f2 ? 'h' : 'l');
             } else {
-                sprintf(buffer, "ST");
+                snprintf(buffer, sizeof(buffer), "ST");
             }
             break;
         case STI:
-            sprintf(buffer, "STI %s", getSymbolAtAddress(address + nextData + 2, nextData, 0));
+            snprintf(buffer, sizeof(buffer), "STI %s", getSymbolAtAddress(address + nextData + 2, nextData, 0));
             break;
         case STK:
             if(f2) {
                 switch(imm2) {
                     case ADD:
-                        sprintf(buffer, "S%s ADD", f1 ? "POP" : "PUSH");
+                        snprintf(buffer, sizeof(buffer), "S%s ADD", f1 ? "POP" : "PUSH");
                         break;
                     case AND:
-                        sprintf(buffer, "S%s AND", f1 ? "POP" : "PUSH");
+                        snprintf(buffer, sizeof(buffer), "S%s AND", f1 ? "POP" : "PUSH");
                         break;
                     case OR:
-                        sprintf(buffer, "S%s OR", f1 ? "POP" : "PUSH");
+                        snprintf(buffer, sizeof(buffer), "S%s OR", f1 ? "POP" : "PUSH");
                         break;
                     case XOR:
-                        sprintf(buffer, "S%s XOR", f1 ? "POP" : "PUSH");
+                        snprintf(buffer, sizeof(buffer), "S%s XOR", f1 ? "POP" : "PUSH");
                         break;
                 }
             } else {
-                sprintf(buffer, "S%s", f1 ? "POP" : "PUSH");
+                snprintf(buffer, sizeof(buffer), "S%s", f1 ? "POP" : "PUSH");
             }
             break;
         case LA:
             if(f1) {
-                sprintf(buffer, "LA%sh x%s", f2 ? "R" : "", getHexString(nextData, 8));
+                snprintf(buffer, sizeof(buffer), "LA%sh x%s", f2 ? "R" : "", getHexString(nextData, 8));
             } else {
-                sprintf(buffer, "LA%sl %s", f2 ? "R" : "", getSymbolAtAddress((address & 0xFF00) | nextData, nextData, 1));
+                snprintf(buffer, sizeof(buffer), "LA%sl %s", f2 ? "R" : "", getSymbolAtAddress((address & 0xFF00) | nextData, nextData, 1));
             }
             break;
         case BR:
             if(f1 && f2 && f3) {
-                sprintf(buffer, "JMP %s",
+                snprintf(buffer, sizeof(buffer), "JMP %s",
                         f4 ? getSymbolAtAddress((address & 0xFF00) | nextData, nextData, 1) : ""
                         );
             } else {
-                sprintf(buffer, "BR%s%s%s %s",
+                snprintf(buffer, sizeof(buffer), "BR%s%s%s %s",
                         f1 ? "n" : "",
                         f2 ? "z" : "",
                         f3 ? "p" : "",
@@ -148,10 +148,10 @@ char* disassembleInstruction(unsigned int address) {
             }
             break;
         case PRT:
-            sprintf(buffer, "PRT%s %d", f1 ? "out" : "in", imm3);
+            snprintf(buffer, sizeof(buffer), "PRT%s %d", f1 ? "out" : "in", imm3);
             break;
         case ASET:
-            sprintf(buffer, "ASET %d", imm4);
+            snprintf(buffer, sizeof(buffer), "ASET %d", imm4);
             break;
         default:
             break;
@@ -171,23 +171,23 @@ char* disassembleData(unsigned int address, char numeric) {
     }
 
     if(numeric) {
-        sprintf(buffer, "%u", memory[address]);
+        snprintf(buffer, sizeof(buffer), "%u", memory[address]);
     } else {
         if(memory[address] >= ' ') { /* Only print printable characters. (Everything before a space in ASCII is non-printable) */
-            sprintf(buffer, "'%c'", (memory[address]));
+            snprintf(buffer, sizeof(buffer), "'%c'", (memory[address]));
         } else { /* ...if it's not printable, check if it's a control character */
             switch(memory[address]) { /* We need to specify the actual bytes here. Escape codes may expand to more than one byte under some OS' */
                 case 0:
-                    sprintf(buffer, "'\\0'");
+                    snprintf(buffer, sizeof(buffer), "'\\0'");
                     break;
                 case 9:
-                    sprintf(buffer, "'\\t'");
+                    snprintf(buffer, sizeof(buffer), "'\\t'");
                     break;
                 case 10:
-                    sprintf(buffer, "'\\n'");
+                    snprintf(buffer, sizeof(buffer), "'\\n'");
                     break;
                 case 13:
-                    sprintf(buffer, "'\\r'");
+                    snprintf(buffer, sizeof(buffer), "'\\r'");
                     break;
                 default:
                     break;
