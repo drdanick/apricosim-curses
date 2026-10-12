@@ -1,7 +1,9 @@
 #ifndef PORTS_H
 #define PORTS_H
 
-void initPorts();
+#include "argparser.h"
+
+void initPorts(Settings s);
 
 void portIO(unsigned int portId, unsigned int write);
 
