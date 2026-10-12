@@ -6,7 +6,7 @@
 
 /* TODO: This code is a hack job, and needs a rewrite */
 unsigned char guiLock = 0;
-unsigned char windowShouldResize = 0;
+volatile sig_atomic_t windowShouldResize = 0;
 
 void doResize() {
     destroygui();
@@ -22,11 +22,11 @@ void doResize() {
     refresh();
 }
 
+/* Only set a flag here; curses calls are not async-signal-safe, so the
+ * resize itself is deferred to unlockGui() in the main loop.
+ */
 void handle_winch(int sig) {
-    if(!guiLock)
-        doResize();
-    else
-        windowShouldResize = 1;
+    windowShouldResize = 1;
 
     signal(SIGWINCH, handle_winch); /* Required under c89 */
 }
@@ -110,8 +110,6 @@ void destroygui() {
     delwin(mainmem_b);
     delwin(stack);
     delwin(stack_b);
-    delwin(registers);
-    delwin(registers_b);
     delwin(info);
     delwin(info_b);
     endwin();
