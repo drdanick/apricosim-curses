@@ -17,7 +17,7 @@ This particular distribution of apricosim requires the following binaries:
 
 The following libraries are also required:
 
-- curses/ncurses
+- ncurses built with mouse version 2 (`NCURSES_MOUSE_VERSION` 2, needed for mouse-wheel scrolling)
 
 
 Compiling
@@ -36,6 +36,16 @@ sudo make install
 For a fully featured version, which is required to run the Apricot OS, enter the following before `make`:
 ```
 ./configure --enable-tty-emulation --enable-port-emulation --enable-disk-emulation
+```
+
+### macOS
+
+The system curses that ships with macOS is built with mouse version 1, so the build will fail with
+`use of undeclared identifier 'BUTTON5_PRESSED'`. Install ncurses with Homebrew and point `configure` at it,
+adding any of the `--enable-*` options above as needed:
+```
+brew install ncurses
+./configure CPPFLAGS=-I$(brew --prefix ncurses)/include LDFLAGS=-L$(brew --prefix ncurses)/lib
 ```
 
 Running
