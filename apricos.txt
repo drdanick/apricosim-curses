@@ -3,7 +3,7 @@ Apricos Architecture
 ====================
 
 64KB of main address space
-256 bytes of stack space (shared with main address space)
+256 bytes of stack space (shared with main address space, page 0xFF00-0xFFFF)
 
 8 bit ISA, 16 possible operations.
 
@@ -20,7 +20,7 @@ $fr    8-bit CPU status flags register
 $a0-15 16 8-bit accumulators
 
 Flags register: [  .  .  .  .  O  N  Z  P  ]
-O = Result overflowed
+O = Unsigned carry out of bit 7 (set by ADD and SPOP ADD; cleared by other flag-setting instructions)
 N = Negative result
 Z = Zero result
 P = Positive result
@@ -46,7 +46,7 @@ OP Code	|  Instruction	|  Description
 1100	|  BR		|  Branch
 1101	|  PRT		|  Port I/O
 1110	|  ASET  	|  Set the current active accumulator
-1111	|  RESERVED	|  Reserved opcode
+1111	|  RESERVED	|  Reserved opcode (executes as a NOP)
 
 ===================
 Instruction details
@@ -94,7 +94,7 @@ $ar ^= imm
 
 0100 xxxx
 
-$ar = !$ar
+$ar = ~$ar (bitwise complement)
 
 -----
  SHF
@@ -103,13 +103,14 @@ $ar = !$ar
 0101 direction(1) count(3)
 
 if direction == 1:
-    $ar >> count-1
+    $ar >> count+1
 else
-    $ar << count-1
+    $ar << count+1
 
 Note that count is offset by 1.
-This means that 00 will correspond to
-a shift of 1, 01 to a shift of 2, etc.
+This means that 000 will correspond to
+a shift of 1, 001 to a shift of 2, etc.
+Both directions shift in zeros.
 
 
 ----
@@ -120,11 +121,14 @@ a shift of 1, 01 to a shift of 2, etc.
 
 if addressWrite == 1:
     if writeHigh == 1:
-        $mr |= ($ar << 8)
+        $ar = high byte of $mr
     else
-        $mr |= ($ar)
+        $ar = low byte of $mr
 else
     $ar = memory[$mr]
+
+Note: the addressWrite form reads a byte of $mr into $ar.
+$mr is not modified. (It is ST, not LD, that writes to $mr.)
 
 
 -----
@@ -134,7 +138,12 @@ else
 0111 xxxx
 ipoffset(8)
 
-$ar = memory[$ip + ipoffset]
+$mr = $ip + ipoffset
+$ar = memory[$mr]
+
+Note: $ip has already been incremented past the 2-byte instruction, so
+the base address is the LDI opcode address + 2. The offset is unsigned
+(forward-only, 0-255). $mr is overwritten with the effective address.
 
 
 ----
@@ -145,11 +154,14 @@ $ar = memory[$ip + ipoffset]
 
 if addressWrite == 1:
     if writeHigh == 1:
-        $mr |= ($ar << 8)
+        $mr = ($mr & 0x00FF) | ($ar << 8)
     else
-        $mr |= ($ar)
+        $mr = ($mr & 0xFF00) | $ar
 else
     memory[$mr] = $ar
+
+Note: the addressWrite form replaces one byte of $mr and preserves the
+other (it does not OR).
 
 
 -----
@@ -159,7 +171,11 @@ else
 1001 xxxx
 ipoffset(8)
 
-memory[$ip + ipoffset] = $ar
+$mr = $ip + ipoffset
+memory[$mr] = $ar
+
+Note: same addressing as LDI (base = opcode address + 2, unsigned
+forward-only offset, $mr overwritten).
 
 
 -----
@@ -168,27 +184,30 @@ memory[$ip + ipoffset] = $ar
 
 1010 pop(1) operation(3)
 
+The stack lives in memory page 0xFF: the accessed cell is
+memory[0xFF00 + $sp]. $sp wraps mod 256.
+
 if pop == 1:
     if operation == 100b:
-        $ar += memory[$sp]
+        $ar += memory[0xFF00 + $sp]
 
     else if operation == 101b:
-        $ar &= memory[$sp]
+        $ar &= memory[0xFF00 + $sp]
 
     else if operation == 110b:
-        $ar |= memory[$sp]
+        $ar |= memory[0xFF00 + $sp]
 
     else if operation == 111b:
-        $ar ^= memory[$sp]
+        $ar ^= memory[0xFF00 + $sp]
 
     else:
-        $ar = memory[$sp]
+        $ar = memory[0xFF00 + $sp]
 
     $sp = $sp - 1
 
 else:
     $sp = $sp + 1
-    memory[$sp] = $ar
+    memory[0xFF00 + $sp] = $ar
 
 -----
  LA
@@ -221,6 +240,11 @@ if (n == 1 && $fr[N] == 1) || (z == 1 && $fr[Z] == 1) || (p == 1 && $fr[P] == 1)
     else:
         $ip[0-7] = immAddress
 
+Note: at execution time $ip already points past the 2-byte instruction
+(opcode address + 2), so the immediate form branches within the page
+containing opcode+2. At reset the flags register is all zeros, so no
+branch (not even BRnzp) is taken until a flag-setting instruction has run.
+
 
 
 -----
@@ -234,6 +258,8 @@ if direction == 1
 else
     read data from port #id
 
+Note: a port read also updates the N/Z/P flags from $ar.
+
 
 ------
  ASET
@@ -242,3 +268,6 @@ else
 1110 aID(4)
 
 Set the current active accumulator to accumulator #aID
+
+Note: ASET also updates the N/Z/P flags from the newly selected
+accumulator.
