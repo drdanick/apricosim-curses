@@ -2,7 +2,19 @@
  APRICOSIM VERSION HISTORY
 ===========================
 
- V1.0 Pre-release
+ V1.1
+----------
+ * Selecting a disk that doesn't exist no longer closes the current disk; the current disk stays selected.
+ * The disassembler can now use debug hints output by the Apricos Assembler (-d option).
+ * Fixed segmentation faults on terminal resize and on termination.
+ * The GUI is no longer resized in the middle of a redraw.
+ * Fixed an occasional buffer overflow in the disassembler.
+ * Reduced CPU usage while idle.
+ * Fixed a build issue with the initPorts forward declaration.
+ * Corrected inaccuracies in the architecture documentation (apricos.txt).
+ * Updated the compilation guide for macOS.
+
+ V1.0
 ----------
  * Added the ability to jump to current program counter value in memory display.
  * Added arithmetic overflow detection
