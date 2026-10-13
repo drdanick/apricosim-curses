@@ -21,14 +21,16 @@ int track;
 */
 
 void selectDiskFile(char* fileName, int id) {
-    /* Check that the file exists */
+    /* Open the new disk first, so that selecting a disk that doesn't
+     * exist leaves the current disk open and selected. */
+    FILE* newFile = fopen(fileName, "r+b");
+    if(!newFile)
+        return;
+
     if(driveFile)
         fclose(driveFile);
 
-    driveFile = fopen(fileName, "r+b");
-    if(!driveFile)
-        return;
-
+    driveFile = newFile;
     track = 0;
     diskID = id;
 }
