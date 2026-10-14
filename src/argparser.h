@@ -32,7 +32,7 @@ const static char* option_descriptions[] = {
     "Set fifo tty file",
     "Set serial tty file",
 #endif /* TTY_EMU */
-    "Load symbols file"
+    "Load symbols file",
     "Load disassembler hints file"
 };
 

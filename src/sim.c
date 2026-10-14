@@ -14,9 +14,9 @@ Settings settings;
 void loadProgram(char* filename) {
     FILE* f = fopen(filename, "rb");
     if(f != NULL) {
-        short magicnum = 0;
-        short origin = 0;
-        short size;
+        unsigned short magicnum = 0;
+        unsigned short origin = 0;
+        unsigned short size = 0;
 
         fread(&magicnum, 2, 1, f);
 
@@ -29,8 +29,9 @@ void loadProgram(char* filename) {
 
         fread(&origin, 2, 1, f);
 
+        /* Bytes that would run past the end of memory are not loaded */
         int i = 0;
-        for(; i < size; i++) {
+        for(; i < size && i + origin < 65536; i++) {
             fread(&memory[i + origin], 1, 1, f);
         }
 
@@ -277,10 +278,11 @@ void mainloop() {
 
         /* Perform a cycle if required */
         if(docycle && cyclemode == 2) {
+            /* Set running even when a breakpoint ends the first slice, so
+             * the whole display is refreshed once the run stops */
+            running = 1;
             if(runSlice())
                 docycle = 0;
-            else
-                running = 1;
             refreshStatusDisplay();
         } else if(docycle) {
             do {

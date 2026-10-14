@@ -36,9 +36,6 @@ def test_help_lists_every_option(aprsim, tools):
     assert [name for name, _ in listed] == expected
 
 
-@pytest.mark.xfail(strict=True, reason="argparser.h: option_descriptions is missing a comma after "
-                   "\"Load symbols file\", so --symbols shows both descriptions run together and "
-                   "--hints reads past the end of the array (prints \"(null)\")")
 def test_help_describes_each_option(aprsim, tools):
     usage = run(aprsim, "-h").stdout
     descriptions = dict(re.findall(r"^\t--(\S+)\s+-\w\s+(.*)$", usage, re.MULTILINE))

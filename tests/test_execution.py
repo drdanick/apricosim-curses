@@ -2,7 +2,7 @@
 
 import pytest
 
-from simtools import ENTER, F1, Key, Simulator, Snapshot, Wait, WaitFor, WaitForTty, pb
+from simtools import ENTER, F1, PAGE_DOWN, Key, Simulator, Snapshot, Wait, WaitFor, WaitForTty, pb
 
 pytestmark = pytest.mark.simulator
 
@@ -86,9 +86,6 @@ def test_breakpoint_stops_run_mode(tty_aprsim, ready, program):
 
 
 @pytest.mark.screen
-@pytest.mark.xfail(strict=True, reason="sim.c mainloop: when a breakpoint is hit in the first RUN slice, "
-                   "running was never set, so refreshAll() is skipped and the registers and memory "
-                   "panels still show the state from before the run")
 def test_breakpoint_stop_shows_the_program_counter(tty_aprsim, ready, program):
     steps = program("steps")
     result = breakpoint_run(tty_aprsim, ready, steps)
@@ -150,10 +147,18 @@ def test_file_without_pb_magic_is_ignored(tty_aprsim, ready, program):
     assert result.tty == b""            # memory is all NOPs
 
 
-@pytest.mark.xfail(strict=True, reason="sim.c loadProgram reads the origin into a signed short, so a "
-                   "program at 0x8000 or above is written before the start of memory[] instead")
 def test_program_at_0x8000(tty_aprsim, ready, program):
     result = Simulator(tty_aprsim, [program("jumphigh").binary, program("high").binary], tty=True).run(
         run_mode(ready) + [WaitForTty(1), Key(F1)])
     assert result.exited_cleanly, result.describe()
     assert result.tty == b"\x48"
+
+
+@pytest.mark.screen
+def test_program_past_the_end_of_memory(aprsim, ready):
+    # 0x200 bytes at 0xFF80: only the 0x80 bytes up to 0xFFFF are loaded
+    result = Simulator(aprsim, [pb(bytes([0xAA]) * 0x200, origin=0xFF80)]).run(
+        [ready, Key(PAGE_DOWN * 0xFF + "j" * 0x7F), Wait(0.5), Snapshot("end"), Key("q")])
+    assert result.exited_cleanly, result.describe()
+    screen = "\n".join(result.snapshots["end"])
+    assert "0xFF7F:    00" in screen and "0xFF80:    AA" in screen
