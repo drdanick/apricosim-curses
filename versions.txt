@@ -2,6 +2,16 @@
  APRICOSIM VERSION HISTORY
 ===========================
 
+ V1.2
+----------
+ * RUN mode is much faster: instructions run in timed slices between keyboard polls and screen updates.
+ * F1 and space now act promptly in RUN mode, even when keys are queued while a program sleeps.
+ * Large instruction and cycle counts are shown as "(many + n)" instead of overflowing.
+ * Programs can now be loaded at 0x8000 and above; bytes past the end of memory are no longer written out of bounds.
+ * Stopping at a breakpoint early in a run now refreshes the register and memory displays.
+ * Fixed the option descriptions printed by -h.
+ * Added an automated test suite (tests/).
+
  V1.1
 ----------
  * Selecting a disk that doesn't exist no longer closes the current disk; the current disk stays selected.
