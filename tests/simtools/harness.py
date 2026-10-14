@@ -52,6 +52,7 @@ DEFAULT_SIZE = (40, 120)    # rows, columns
 KEY_WAIT = 0.2              # seconds to keep draining after a key, by default
 SIZE_WAIT = 0.3             # ... after a resize or a signal
 EXIT_WAIT = 3.0             # seconds to wait for the simulator to exit after the last action
+TYPE_CHUNK = 64             # bytes typed at a time (see _Run._type)
 
 
 # ---------------------------------------------------------------- actions
@@ -280,6 +281,7 @@ class _Run:
         # The price is that the PTY doesn't become the simulator's controlling
         # terminal, so resizes must signal it explicitly (see Size).
         self.fd, terminal = os.openpty()
+        os.set_blocking(self.fd, False)     # see _type
         self._set_size(*size)
         try:
             self.process = subprocess.Popen(command, cwd=cwd, env={**os.environ, "TERM": "xterm"},
@@ -324,10 +326,7 @@ class _Run:
             self._drain(action.wait)
         elif isinstance(action, Key):
             data = action.text.encode("latin-1") if isinstance(action.text, str) else action.text
-            try:
-                os.write(self.fd, data)
-            except OSError:
-                self.alive = False
+            self._type(data)
             self._drain(action.wait)
         elif isinstance(action, Wait):
             self._drain(action.seconds)
@@ -353,6 +352,30 @@ class _Run:
     def _set_size(self, rows: int, cols: int) -> None:
         fcntl.ioctl(self.fd, termios.TIOCSWINSZ, struct.pack("HHHH", rows, cols, 0, 0))
 
+    def _type(self, data: bytes) -> None:
+        """Write ``data`` to the terminal in small pieces, reading output in between.
+
+        Writing a long sequence in one go can deadlock: the write blocks once
+        the PTY's input buffer is full, while the simulator blocks drawing,
+        because its output isn't being read. The master is non-blocking (macOS
+        reports a PTY writable even when a write would block), so a full
+        buffer just means reading some output and trying again.
+        """
+        while data and self.alive:
+            readable, writable, _ = select.select([self.fd], [self.fd], [], 0.05)
+            if readable:
+                self._read_terminal()
+            if writable and self.alive:
+                try:
+                    written = os.write(self.fd, data[:TYPE_CHUNK])
+                except BlockingIOError:
+                    time.sleep(0.005)
+                    continue
+                except OSError:
+                    self.alive = False
+                    return
+                data = data[written:]
+
     def _drain(self, seconds: float, done=None) -> None:
         """Read the terminal and the FIFO for ``seconds``, or until ``done()`` is true."""
         end = time.time() + seconds
@@ -364,17 +387,23 @@ class _Run:
             if self.fifo_fd in ready:
                 self._read_tty()
             if self.fd in ready:
-                try:
-                    data = os.read(self.fd, 65536)
-                except OSError:         # EIO: nothing holds the slave open any more
-                    data = b""
-                if not data:
-                    self.alive = False
-                else:
-                    self.log.extend(data)
-                    if self.screen is not None:
-                        self.screen[1].feed(data)
+                self._read_terminal()
         self._read_tty()
+
+    def _read_terminal(self) -> None:
+        """Read what the simulator drew (the terminal must be readable)."""
+        try:
+            data = os.read(self.fd, 65536)
+        except BlockingIOError:
+            return
+        except OSError:         # EIO: nothing holds the slave open any more
+            data = b""
+        if not data:
+            self.alive = False
+        else:
+            self.log.extend(data)
+            if self.screen is not None:
+                self.screen[1].feed(data)
 
     def _read_tty(self) -> None:
         if self.fifo_fd is None:
