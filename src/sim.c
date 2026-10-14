@@ -7,6 +7,7 @@
 #include "ports.h"
 #endif
 #include <unistd.h>
+#include <sys/time.h>
 
 Settings settings;
 
@@ -107,6 +108,41 @@ static void finish(int sig) {
     freeSettings(settings);
     freeSymbolTable();
     exit(0);
+}
+
+/* Returns the number of microseconds elapsed since start */
+long elapsedMicros(struct timeval* start) {
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    return (now.tv_sec - start->tv_sec) * 1000000L + (now.tv_usec - start->tv_usec);
+}
+
+/*
+ * Run whole instructions for up to RUN_SLICE_USEC of wall time, or until a
+ * breakpoint is reached. Returns non-zero if a breakpoint stopped the run.
+ *
+ * Keyboard polling and screen updates are expensive, so in RUN mode they are
+ * done once per slice rather than once per instruction. The clock is read
+ * every RUN_SLICE_CHECK_INTERVAL instructions, and after every PRT, since port
+ * I/O (sleeps, blocking keyboard reads) can take arbitrarily long.
+ */
+int runSlice() {
+    struct timeval start;
+    unsigned int count = 0;
+
+    gettimeofday(&start, NULL);
+    for(;;) {
+        do {
+            cycle();
+        } while(nextState != &x00);
+
+        if(breakpoints[pc])
+            return 1;
+
+        if((++count % RUN_SLICE_CHECK_INTERVAL == 0 || ((ir & 0xF0) >> 4) == PRT)
+                && elapsedMicros(&start) >= RUN_SLICE_USEC)
+            return 0;
+    }
 }
 
 int findNextBreakpoint(int stepSize) {
@@ -231,22 +267,23 @@ void mainloop() {
         }
 
         /* Perform a cycle if required */
-        if(docycle) {
+        if(docycle && cyclemode == 2) {
+            if(runSlice())
+                docycle = 0;
+            else
+                running = 1;
+            refreshStatusDisplay();
+        } else if(docycle) {
             do {
                 cycle();
             } while(cyclemode && nextState != &x00);
 
-            if(cyclemode != 2) {
-                refreshMemoryDisplay();
-                refreshStackDisplay();
-                refreshRegisterDisplay();
-            }
+            refreshMemoryDisplay();
+            refreshStackDisplay();
+            refreshRegisterDisplay();
             refreshStatusDisplay();
 
-            if(cyclemode != 2 || breakpoints[pc])
-                docycle = 0;
-            else
-                running = 1;
+            docycle = 0;
         }
 
         if(!docycle && running) {
