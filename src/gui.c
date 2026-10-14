@@ -347,12 +347,24 @@ void clearStatusDisplay() {
 
 }
 
+/* Write a cycle or instruction count, as "(many + n)" from COUNT_MANY up */
+static void formatCount(char *buffer, size_t size, int count) {
+    if(count < COUNT_MANY)
+        snprintf(buffer, size, "%d", count);
+    else
+        snprintf(buffer, size, "(many + %d)", count - COUNT_MANY);
+}
+
 void refreshStatusDisplay() {
+    char instructions[24], cycles[24];
+
     lockGui();
     clearStatusDisplay();
     mvwaddstr(info, 0,3, "State: 0x");
     printHexString(&info, currentState, 8);
-    wprintw(info, "  Instruction Count: %d  Cycle Count: %d  Mode: %s",instructionCount, cycleCount,cyclemode ? ((cyclemode == 1) ? "INSTRUCTION" : "RUN") : "STATE");
+    formatCount(instructions, sizeof(instructions), instructionCount);
+    formatCount(cycles, sizeof(cycles), cycleCount);
+    wprintw(info, "  Instruction Count: %s  Cycle Count: %s  Mode: %s",instructions, cycles,cyclemode ? ((cyclemode == 1) ? "INSTRUCTION" : "RUN") : "STATE");
 
     mvhline(iy, 0, 0, iw);
     mvvline(iy, 0, 0, 1);

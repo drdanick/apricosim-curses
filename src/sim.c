@@ -174,6 +174,15 @@ void mainloop() {
             continue;
         }
 
+        /*
+         * While running, only space and F1 are acted on and any other key is
+         * discarded. Discard every waiting key now rather than one per slice,
+         * so that keys queued while the program sleeps (a slice lasts as long
+         * as the sleep) can't hold up a space or F1 behind them.
+         */
+        while(running && c != ERR && c != ' ' && c != KEY_F(1))
+            c = getch();
+
         if(!running || c == ' ' || c == KEY_F(1)) {
             switch(c) {
                 case KEY_MOUSE:

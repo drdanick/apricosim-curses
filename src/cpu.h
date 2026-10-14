@@ -93,6 +93,11 @@ char halted;
 char currentState;
 int cycleCount, instructionCount;
 
+/* Counts from COUNT_MANY up are shown as "(many + n)". Once n reaches
+ * COUNT_MANY too, the count drops back to COUNT_MANY (n = 0), so it can
+ * never overflow. */
+#define COUNT_MANY 1000000
+
 
 /* Function pointers */
 void (*nextState)();

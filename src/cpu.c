@@ -50,9 +50,10 @@ void resetMachine() { /* Clear the registers */
 
 void cycle() {
     nextState();
-    cycleCount++;
-    if(nextState == &x00)
-        instructionCount++;
+    if(++cycleCount == 2 * COUNT_MANY)
+        cycleCount = COUNT_MANY;
+    if(nextState == &x00 && ++instructionCount == 2 * COUNT_MANY)
+        instructionCount = COUNT_MANY;
 }
 
 void setflags() {
