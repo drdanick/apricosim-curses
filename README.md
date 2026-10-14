@@ -81,6 +81,16 @@ The simulator can be operated with the following controls:
 `F1`          Interrupt the currently running program and quit the simulator.
 
 
+Testing
+-------
+
+An automated test suite in [tests/](tests/README.md) runs the simulator headlessly in a pseudo-terminal. It checks
+quitting, resizing, the display, instruction semantics and the ports. Build the simulator with TTY and port emulation,
+put `apricosasm.jar` in the root of this repository, and run `tox` from the `tests/` directory; see
+[tests/README.md](tests/README.md) for requirements and options. The same harness is available from the command line
+as `tests/ptyharness.py`, for debugging by hand.
+
+
 Licence
 -------
 

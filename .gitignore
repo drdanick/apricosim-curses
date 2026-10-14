@@ -35,3 +35,6 @@ missing
 
 # Compilation database
 compile_commands.json
+
+# Apricos assembler (used by the tests)
+apricosasm.jar
